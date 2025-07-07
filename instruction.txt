@@ -1,0 +1,126 @@
+Project Overview:
+Build a simple, modular web-based inventory management system using PHP (with plain CSS & JS, not a framework) tailored for Seri Perangin Catering. The system should focus on perishable goods tracking, stock monitoring, staff management, and basic reporting. Separate each feature into different PHP pages, with dedicated .css and .js files per page. Include a common reusable navbar/sidebar as a separate file.
+
+🗂️ Folder Structure (enforce this):
+swift
+Copy
+Edit
+/project-root/
+│
+├── /assets/
+│   ├── /css/
+│   │   ├── login.css
+│   │   ├── homepage.css
+│   │   ├── inventory.css
+│   │   ├── stock.css
+│   │   ├── staff.css
+│   │   └── reports.css
+│   ├── /js/
+│   │   ├── login.js
+│   │   ├── homepage.js
+│   │   ├── inventory.js
+│   │   ├── stock.js
+│   │   ├── staff.js
+│   │   └── reports.js
+│
+├── /includes/
+│   ├── db.php              // Database connection
+│   ├── navbar.php          // Common navbar/sidebar
+│   ├── auth_check.php      // Check session for protected pages
+│
+├── index.php               // Login Page
+├── register.php            // Create account
+├── homepage.php            // Dashboard
+├── inventory.php           // Manage inventory items
+├── stock.php               // Stock in/out
+├── staff.php               // Staff CRUD
+├── reports.php             // Simple reporting
+├── logout.php              // Logout functionality
+💼 Modules Breakdown
+1. 🔐 Authentication System (RM150)
+register.php – Page for creating a new account (with role dropdown: Owner/Staff)
+
+index.php – Login page
+
+Session management (auth_check.php)
+
+Redirect user based on role after login
+
+Use hashed passwords (e.g., password_hash())
+
+2. 📦 Basic Inventory Management (RM300)
+inventory.php
+Functions:
+
+Add/Edit/Delete inventory items (name, category, unit, expiry date optional)
+
+View inventory list with a basic search
+
+inventory.css / inventory.js – For basic form validation and styling
+
+Store inventory items in DB with fields like: item_id, item_name, category, unit, expiry_date, created_at
+
+3. 📊 Stock Management (RM250)
+stock.php
+
+Add new stock-in or stock-out entries
+
+Show current quantity available
+
+Low-stock alert (simple text indicator if below threshold)
+
+Store stock entries separately (e.g., table: stock_logs) to track history
+
+stock.js to handle client-side quantity checks
+
+4. 👤 Basic Staff Management (RM150)
+staff.php
+
+CRUD for users/staff (only accessible by Owner)
+
+View list of staff and their roles
+
+Staff users have limited permissions (only stock in/out, update usage)
+
+5. 📑 Simple Reporting (RM150)
+reports.php
+
+Generate inventory list (with expiry dates)
+
+Show stock levels summary
+
+Basic waste analysis (e.g., expired items count)
+
+🧩 Common Elements
+navbar.php in /includes/:
+
+Contains navigation links and highlights current page
+
+Should be included via include() in all main pages
+
+db.php:
+
+Simple MySQLi connection code
+
+Each .php page must:
+
+Include its own .css and .js via <link> and <script>
+
+Include auth_check.php to protect routes (except login/register)
+
+💡 Tips for Cursor
+When generating code:
+
+Use Bootstrap only if allowed, else use vanilla CSS.
+
+Use procedural PHP (not OOP) unless explicitly allowed.
+
+Avoid frameworks like Laravel or React.
+
+Use HTML <table> for listing items, and HTML <form> for Add/Edit.
+
+Use basic JavaScript alerts or inline validation.
+
+All DB interactions must be secure (prepared statements if possible).
+
+Start by creating index.php (Login Page) with login.css and login.js, then move to register.php, and so on.

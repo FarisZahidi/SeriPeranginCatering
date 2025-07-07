@@ -1,0 +1,77 @@
+body {
+    background: #f7f7f7;
+    font-family: Arial, sans-serif;
+}
+.inventory-container {
+    width: 95%;
+    max-width: 1000px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.inventory-container h1, .inventory-container h2 {
+    text-align: center;
+}
+.inventory-form {
+    margin-bottom: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+}
+.inventory-form label {
+    min-width: 100px;
+}
+.inventory-form input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    min-width: 180px;
+}
+.inventory-form button {
+    padding: 10px 20px;
+    background: #007b5e;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.inventory-form button:hover {
+    background: #005f46;
+}
+.inventory-search {
+    width: 60%;
+    margin: 0 auto 20px auto;
+    display: block;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+.inventory-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+.inventory-table th, .inventory-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+.inventory-table th {
+    background: #007b5e;
+    color: #fff;
+}
+.inventory-table tr:nth-child(even) {
+    background: #f2f2f2;
+}
+.inventory-table a {
+    color: #007b5e;
+    text-decoration: none;
+}
+.inventory-table a:hover {
+    text-decoration: underline;
+} 
