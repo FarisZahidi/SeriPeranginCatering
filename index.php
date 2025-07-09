@@ -7,15 +7,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
     if ($username && $password) {
-        $stmt = mysqli_prepare($conn, "SELECT user_id, username, password, role FROM users WHERE username = ? LIMIT 1");
+        $stmt = mysqli_prepare($conn, "SELECT user_id, name, username, password, role FROM users WHERE username = ? LIMIT 1");
         mysqli_stmt_bind_param($stmt, 's', $username);
         mysqli_stmt_execute($stmt);
         mysqli_stmt_store_result($stmt);
         if (mysqli_stmt_num_rows($stmt) === 1) {
-            mysqli_stmt_bind_result($stmt, $user_id, $db_username, $db_password, $role);
+            mysqli_stmt_bind_result($stmt, $user_id, $db_name, $db_username, $db_password, $role);
             mysqli_stmt_fetch($stmt);
             if (password_verify($password, $db_password)) {
                 $_SESSION['user_id'] = $user_id;
+                $_SESSION['name'] = $db_name;
                 $_SESSION['username'] = $db_username;
                 $_SESSION['role'] = $role;
                 // Redirect all users to dashboard
@@ -44,35 +45,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="assets/css/login.css">
 </head>
 
-<body style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); min-height:100vh; margin:0; padding:0;">
-    <!-- Header with logo/title -->
-    <header style="width:100%; padding:32px 0 18px 0; text-align:center;">
-        <img src="assets/images/logo.png" alt="Seri Perangin Catering Logo" style="height:64px; margin-bottom:10px;"
-            onerror="this.style.display='none'">
-        <h1 style="font-size:2.1rem; font-weight:800; color:#388e3c; margin:0; letter-spacing:1px;">Seri Perangin
-            Catering</h1>
-        <div style="font-size:1.1rem; color:#388e3c; margin-top:4px; font-weight:500;">Inventory & Staff Management
-            System</div>
-    </header>
-    <div class="login-container">
-        <h2 style="color:#388e3c; font-weight:700; margin-bottom:18px;">Login</h2>
+<body class="auth-bg">
+    <!-- Overlay handled by CSS -->
+    <div class="auth-card-modern">
+        <div class="auth-logo">
+            <!-- Replace with your logo image if desired -->
+            <svg width="72" height="72" viewBox="0 0 56 56" fill="none">
+                <circle cx="28" cy="28" r="28" fill="#43a047" />
+                <g>
+                    <rect x="16" y="36" width="24" height="6" rx="3" fill="#fff" />
+                    <rect x="24" y="14" width="8" height="18" rx="4" fill="#fff" />
+                    <rect x="20" y="10" width="16" height="6" rx="3" fill="#fff" />
+                </g>
+                <g>
+                    <ellipse cx="28" cy="44" rx="10" ry="2.5" fill="#c8e6c9" opacity="0.7" />
+                </g>
+            </svg>
+        </div>
+        <h2>Welcome Back</h2>
+        <p class="auth-subtitle">Seri Perangin Catering<br><span style='font-size:0.98rem; color:#fd7e14;'>Inventory
+                Management System</span></p>
         <?php if (!empty($error)): ?>
-            <div class="error"
-                style="color:#c62828; margin-bottom:10px; text-align:center; font-weight:600; background:#ffebee; border-radius:6px; padding:8px 0; width:100%;">
+            <div class="error"><i class="fa-solid fa-triangle-exclamation" style="font-size:1.2em;"></i>
                 <?php echo htmlspecialchars($error); ?>
             </div>
         <?php endif; ?>
-        <form id="loginForm" method="post" action="index.php">
-            <label for="username" style="font-weight:600; color:#388e3c;">Username</label>
-            <input type="text" id="username" name="username" required>
-            <label for="password" style="font-weight:600; color:#388e3c;">Password</label>
-            <input type="password" id="password" name="password" required>
-            <button type="submit">Login</button>
+        <form method="post" action="index.php" autocomplete="off">
+            <div class="form-group-modern">
+                <input type="text" id="username" name="username" required placeholder=" ">
+                <label for="username">Username</label>
+            </div>
+            <div class="form-group-modern">
+                <input type="password" id="password" name="password" required placeholder=" ">
+                <label for="password">Password</label>
+            </div>
+            <button type="submit" class="auth-btn"><i class="fa fa-sign-in-alt"></i> Login</button>
         </form>
-        <p style="margin-top:18px; color:#388e3c; font-size:1rem;">Don't have an account? <a href="register.php"
-                style="color:#1976d2; text-decoration:underline;">Register here</a></p>
+        <div class="auth-divider"><span>or</span></div>
+        <div class="auth-switch">
+            Don't have an account? <a href="register.php">Register here</a>
+        </div>
     </div>
-    <script src="assets/js/login.js"></script>
 </body>
 
 </html>

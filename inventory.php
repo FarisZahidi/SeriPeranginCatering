@@ -201,10 +201,18 @@ $units = ['kg', 'g', 'L', 'ml', 'pcs', 'pack', 'box'];
         Swal.fire({
           toast: true,
           position: 'top-end',
-          icon: 'error',
-          title: <?php echo json_encode($error); ?>,
+          icon: undefined,
+          title: '<div style="display:flex;align-items:center;gap:10px;"><i class=\'fa-solid fa-triangle-exclamation\' style=\'color:#dc3545;font-size:1.2em;\'></i> <span>' + <?php echo json_encode($error); ?> + '</span></div>',
+          background: 'rgba(255,255,255,0.97)',
+          color: '#dc3545',
           showConfirmButton: false,
-          timer: 3000
+          timer: 3000,
+          customClass: { popup: 'swal2-toast-glassy-error' },
+          didOpen: (toast) => {
+            toast.style.borderLeft = '6px solid #dc3545';
+            toast.style.boxShadow = '0 2px 8px #c6282822';
+            toast.style.fontWeight = '700';
+          }
         });
       });
     </script>
@@ -215,10 +223,18 @@ $units = ['kg', 'g', 'L', 'ml', 'pcs', 'pack', 'box'];
         Swal.fire({
           toast: true,
           position: 'top-end',
-          icon: 'success',
-          title: <?php echo json_encode($success); ?>,
+          icon: undefined,
+          title: '<div style="display:flex;align-items:center;gap:10px;"><i class=\'fa-solid fa-circle-check\' style=\'color:#43a047;font-size:1.2em;\'></i> <span>' + <?php echo json_encode($success); ?> + '</span></div>',
+          background: 'rgba(255,255,255,0.97)',
+          color: '#43a047',
           showConfirmButton: false,
-          timer: 3000
+          timer: 3000,
+          customClass: { popup: 'swal2-toast-glassy-success' },
+          didOpen: (toast) => {
+            toast.style.borderLeft = '6px solid #43a047';
+            toast.style.boxShadow = '0 2px 8px #43a04722';
+            toast.style.fontWeight = '700';
+          }
         });
       });
     </script>

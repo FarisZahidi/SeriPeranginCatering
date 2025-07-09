@@ -48,51 +48,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="assets/css/login.css">
 </head>
 
-<body style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); min-height:100vh; margin:0; padding:0;">
-    <!-- Header with logo/title -->
-    <header style="width:100%; padding:32px 0 18px 0; text-align:center;">
-        <img src="assets/images/logo.png" alt="Seri Perangin Catering Logo" style="height:64px; margin-bottom:10px;"
-            onerror="this.style.display='none'">
-        <h1 style="font-size:2.1rem; font-weight:800; color:#388e3c; margin:0; letter-spacing:1px;">Seri Perangin
-            Catering</h1>
-        <div style="font-size:1.1rem; color:#388e3c; margin-top:4px; font-weight:500;">Inventory & Staff Management
-            System</div>
-    </header>
-    <div class="login-container">
-        <h2 style="color:#388e3c; font-weight:700; margin-bottom:18px;">Register</h2>
+<body class="auth-bg">
+    <!-- Overlay handled by CSS -->
+    <div class="auth-card-modern">
+        <div class="auth-logo">
+            <!-- Replace with your logo image if desired -->
+            <svg width="72" height="72" viewBox="0 0 56 56" fill="none">
+                <circle cx="28" cy="28" r="28" fill="#43a047" />
+                <g>
+                    <rect x="16" y="36" width="24" height="6" rx="3" fill="#fff" />
+                    <rect x="24" y="14" width="8" height="18" rx="4" fill="#fff" />
+                    <rect x="20" y="10" width="16" height="6" rx="3" fill="#fff" />
+                </g>
+                <g>
+                    <ellipse cx="28" cy="44" rx="10" ry="2.5" fill="#c8e6c9" opacity="0.7" />
+                </g>
+            </svg>
+        </div>
+        <h2>Create Account</h2>
+        <p class="auth-subtitle">Seri Perangin Catering<br><span style='font-size:0.98rem; color:#fd7e14;'>Inventory
+                Management System</span></p>
         <?php if ($error): ?>
-            <div class="error"
-                style="color:#c62828; margin-bottom:10px; text-align:center; font-weight:600; background:#ffebee; border-radius:6px; padding:8px 0; width:100%;">
+            <div class="error">
                 <?php echo htmlspecialchars($error); ?>
             </div>
         <?php endif; ?>
         <?php if ($success): ?>
-            <div class="success"
-                style="color:#2e7d32; margin-bottom:10px; text-align:center; font-weight:600; background:#e8f5e9; border-radius:6px; padding:8px 0; width:100%;">
+            <div class="success">
                 <?php echo $success; ?>
             </div>
         <?php endif; ?>
-        <form id="registerForm" method="post" action="register.php">
-            <label for="name" style="font-weight:600; color:#388e3c;">Name</label>
-            <input type="text" id="name" name="name" required>
-            <label for="username" style="font-weight:600; color:#388e3c;">Username</label>
-            <input type="text" id="username" name="username" required>
-            <label for="password" style="font-weight:600; color:#388e3c;">Password</label>
-            <input type="password" id="password" name="password" required>
-            <label for="confirm_password" style="font-weight:600; color:#388e3c;">Confirm Password</label>
-            <input type="password" id="confirm_password" name="confirm_password" required>
-            <label for="role" style="font-weight:600; color:#388e3c;">Role</label>
-            <select id="role" name="role" required>
-                <option hidden value="">Select Role</option>
-                <option value="Owner">Owner</option>
-                <option value="Staff">Staff</option>
-            </select>
-            <button type="submit">Register</button>
+        <form method="post" action="register.php" autocomplete="off">
+            <div class="form-group-modern">
+                <input type="text" id="name" name="name" required placeholder=" ">
+                <label for="name">Name</label>
+            </div>
+            <div class="form-group-modern">
+                <input type="text" id="username" name="username" required placeholder=" ">
+                <label for="username">Username</label>
+            </div>
+            <div class="form-group-modern">
+                <input type="password" id="password" name="password" required placeholder=" ">
+                <label for="password">Password</label>
+            </div>
+            <div class="form-group-modern">
+                <input type="password" id="confirm_password" name="confirm_password" required placeholder=" ">
+                <label for="confirm_password">Confirm Password</label>
+            </div>
+            <div class="form-group-modern">
+                <select id="role" name="role" required>
+                    <option hidden value="">Select Role</option>
+                    <option value="Owner">Owner</option>
+                    <option value="Staff">Staff</option>
+                </select>
+                <label for="role">Role</label>
+            </div>
+            <button type="submit" class="auth-btn"><i class="fa fa-user-plus"></i> Register</button>
         </form>
-        <p style="margin-top:18px; color:#388e3c; font-size:1rem;">Already have an account? <a href="index.php"
-                style="color:#1976d2; text-decoration:underline;">Login here</a></p>
+        <div class="auth-divider"><span>or</span></div>
+        <div class="auth-switch">
+            Already have an account? <a href="index.php">Login here</a>
+        </div>
     </div>
-    <script src="assets/js/register.js"></script>
 </body>
 
 </html>

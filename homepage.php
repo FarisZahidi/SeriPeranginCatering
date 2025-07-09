@@ -68,59 +68,44 @@ $upcoming = [
 </head>
 
 <body>
-    <main style="margin-left:220px; padding:32px 16px 16px 16px; background:var(--bg); min-height:100vh;">
-        <h1 style="font-size:2.2rem; font-weight:700; margin-bottom:8px;">Welcome,
-            <?php echo htmlspecialchars($_SESSION['username']); ?>!
-        </h1>
-        <div class="text-muted mb-3" style="font-size:1.1rem;">This is your dashboard. Use the sidebar to manage
-            inventory, staff, stock, and view reports.</div>
+    <main class="dashboard-main">
+        <h1 class="dashboard-title">Welcome, <?php echo htmlspecialchars($_SESSION['name']); ?>!</h1>
+        <div class="dashboard-subtitle">This is your dashboard. Use the sidebar to manage inventory, staff, stock, and
+            view reports.</div>
         <!-- Alerts Card (now on top) -->
-        <div
-            style="background:#fffbe6; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,0.04); padding:28px 24px; width:100%; margin-bottom:36px; display:flex; flex-direction:column; justify-content:center; border-left:6px solid #ffc107;">
-            <div
-                style="font-weight:700; font-size:1.15rem; margin-bottom:18px; color:#bfa100; display:flex; align-items:center;">
-                <i class="fa-solid fa-bell-exclamation" style="margin-right:8px; color:#ffc107;"></i>
-                Expiry & Low Stock Alerts
-            </div>
-            <ul style="list-style:none; padding:0; margin:0;">
+        <div class="dashboard-alerts">
+            <div class="alert-title"><i class="fa-solid fa-bell-exclamation"></i> Expiry & Low Stock Alerts</div>
+            <ul>
                 <!-- Expiring Soon -->
                 <?php if (mysqli_num_rows($expiring_soon) > 0): ?>
-                    <li style="margin-bottom:16px;">
+                    <li>
                         <div style="color: #dc3545; font-weight: 600; margin-bottom:8px; display:flex; align-items:center;">
                             <i class="fa-solid fa-calendar-week" style="margin-right:6px; color:#dc3545;"></i>
-                            <span
-                                style="background:#ffeaea; color:#dc3545; border-radius:12px; padding:2px 12px; font-size:0.98em; font-weight:600; margin-right:8px;">Expiring
-                                Soon</span>
+                            <span class="badge-expiry">Expiring Soon</span>
                         </div>
                         <?php while ($row = mysqli_fetch_assoc($expiring_soon)): ?>
                             <div style="margin-left:24px; margin-bottom:6px; display:flex; align-items:center;">
                                 <i class="fa-solid fa-exclamation-circle" style="color:#dc3545; margin-right:7px;"></i>
                                 <span style="font-weight:600;"><?php echo htmlspecialchars($row['item_name']); ?></span>
-                                <span
-                                    style="background:#fff0f0; color:#dc3545; border-radius:10px; padding:2px 10px; font-size:0.93em; margin-left:10px;">
-                                    Batch: <?php echo htmlspecialchars($row['expiry_date']); ?>
-                                </span>
+                                <span class="badge-expiry" style="margin-left:10px;">Batch:
+                                    <?php echo htmlspecialchars($row['expiry_date']); ?></span>
                             </div>
                         <?php endwhile; ?>
                     </li>
                 <?php endif; ?>
                 <!-- Low Stock -->
                 <?php if (mysqli_num_rows($low_stock_items) > 0): ?>
-                    <li style="margin-bottom:16px;">
+                    <li>
                         <div style="color: #ffc107; font-weight: 600; margin-bottom:8px; display:flex; align-items:center;">
                             <i class="fa-solid fa-triangle-exclamation" style="margin-right:6px; color:#ffc107;"></i>
-                            <span
-                                style="background:#fffbe6; color:#bfa100; border-radius:12px; padding:2px 12px; font-size:0.98em; font-weight:600; margin-right:8px;">Low
-                                Stock</span>
+                            <span class="badge-low">Low Stock</span>
                         </div>
                         <?php while ($row = mysqli_fetch_assoc($low_stock_items)): ?>
                             <div style="margin-left:24px; margin-bottom:6px; display:flex; align-items:center;">
                                 <i class="fa-solid fa-box-open" style="color:#ffc107; margin-right:7px;"></i>
                                 <span style="font-weight:600;"><?php echo htmlspecialchars($row['item_name']); ?></span>
-                                <span
-                                    style="background:#fff8e1; color:#bfa100; border-radius:10px; padding:2px 10px; font-size:0.93em; margin-left:10px;">
-                                    Qty: <span style="color:#dc3545;"><?php echo $row['stock_level']; ?></span>
-                                </span>
+                                <span class="badge-low" style="margin-left:10px;">Qty: <span
+                                        style="color:#dc3545;"><?php echo $row['stock_level']; ?></span></span>
                             </div>
                         <?php endwhile; ?>
                     </li>
@@ -131,56 +116,41 @@ $upcoming = [
             </ul>
         </div>
         <!-- Inventory Summary Section -->
-        <div style="font-size:1.25rem; font-weight:700; margin-bottom:12px; color:#333;">Inventory Summary</div>
-        <div style="display:flex; flex-wrap:wrap; gap:32px; margin-bottom:32px; width:100%;">
-            <div
-                style="background:#fff; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.06); padding:32px 0; flex:1; min-width:180px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:6px solid #007bff; height:140px;">
-                <div style="color:#888; font-size:1.05rem; margin-bottom:6px; font-weight:500;"><i
-                        class="fa-solid fa-warehouse text-success"></i> Total Items</div>
-                <div style="font-size:2.6rem; font-weight:700; color:#007bff;"> <?php echo $total_items; ?> </div>
+        <div class="dashboard-analytics-title">Inventory Summary</div>
+        <div class="dashboard-summary">
+            <div class="dashboard-card">
+                <div class="card-label"><i class="fa-solid fa-warehouse text-success"></i> Total Items</div>
+                <div class="card-value"> <?php echo $total_items; ?> </div>
             </div>
-            <div
-                style="background:#fff; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.06); padding:32px 0; flex:1; min-width:180px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:6px solid #ffc107; height:140px;">
-                <div style="color:#888; font-size:1.05rem; margin-bottom:6px; font-weight:500;"><i
-                        class="fa-solid fa-triangle-exclamation text-warning"></i> Low Stock</div>
-                <div style="font-size:2.6rem; font-weight:700; color:#ffc107;"> <?php echo $low_stock_count; ?> </div>
+            <div class="dashboard-card low">
+                <div class="card-label"><i class="fa-solid fa-triangle-exclamation text-warning"></i> Low Stock</div>
+                <div class="card-value low"> <?php echo $low_stock_count; ?> </div>
             </div>
-            <div
-                style="background:#fff; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.06); padding:32px 0; flex:1; min-width:180px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:6px solid #dc3545; height:140px;">
-                <div style="color:#888; font-size:1.05rem; margin-bottom:6px; font-weight:500;"><i
-                        class="fa-solid fa-calendar-xmark text-danger"></i> Expired Items</div>
-                <div style="font-size:2.6rem; font-weight:700; color:#dc3545;"> <?php echo $expired_count; ?> </div>
+            <div class="dashboard-card expired">
+                <div class="card-label"><i class="fa-solid fa-calendar-xmark text-danger"></i> Expired Items</div>
+                <div class="card-value expired"> <?php echo $expired_count; ?> </div>
             </div>
-            <div
-                style="background:#fff; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.06); padding:32px 0; flex:1; min-width:180px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:6px solid #6c757d; height:140px;">
-                <div style="color:#888; font-size:1.05rem; margin-bottom:6px; font-weight:500;"><i
-                        class="fa-solid fa-clock-rotate-left text-info"></i> Recent Updates</div>
-                <div style="font-size:2.6rem; font-weight:700; color:#6c757d;">
-                    <?php echo mysqli_num_rows($recent_updates); ?>
-                </div>
+            <div class="dashboard-card recent">
+                <div class="card-label"><i class="fa-solid fa-clock-rotate-left text-info"></i> Recent Updates</div>
+                <div class="card-value recent"> <?php echo mysqli_num_rows($recent_updates); ?> </div>
             </div>
         </div>
         <!-- Analytics & Alerts Row -->
-        <div style="font-size:1.25rem; font-weight:700; margin-bottom:12px; color:#333;">Analytics & Alerts</div>
-        <div style="display:flex; flex-wrap:wrap; gap:24px; margin-bottom:32px; align-items:stretch;">
-            <div
-                style="background:#fff; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.06); padding:24px; flex:1; min-width:320px; max-width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; height:340px;">
+        <div class="dashboard-analytics-title">Analytics & Alerts</div>
+        <br>
+        <div class="dashboard-analytics-row">
+            <div class="dashboard-analytics-card">
                 <div style="font-weight:600; margin-bottom:12px; text-align:center;">Inventory Status Overview</div>
-                <canvas id="stockChart" width="600" height="220"
-                    style="display:block; margin:auto; width:100%; max-width:600px; height:auto;"></canvas>
+                <canvas id="stockChart" width="600" height="220"></canvas>
             </div>
-            <div
-                style="background:#fff; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.06); padding:24px; flex:1; min-width:320px; max-width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; height:340px;">
+            <div class="dashboard-analytics-card">
                 <div style="font-weight:600; margin-bottom:12px; text-align:center;">Stock by Category</div>
-                <canvas id="categoryChart" width="600" height="220"
-                    style="display:block; margin:auto; width:100%; max-width:600px; height:auto;"></canvas>
+                <canvas id="categoryChart" width="600" height="220"></canvas>
             </div>
-            <div
-                style="background:#fff; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.06); padding:24px; flex:1; min-width:320px; max-width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; height:340px;">
+            <div class="dashboard-analytics-card">
                 <div style="font-weight:600; margin-bottom:12px; text-align:center;">Stock In/Out Trend (Last 8 Weeks)
                 </div>
-                <canvas id="trendChart" width="600" height="220"
-                    style="display:block; margin:auto; width:100%; max-width:600px; height:auto;"></canvas>
+                <canvas id="trendChart" width="600" height="220"></canvas>
             </div>
         </div>
     </main>
@@ -200,21 +170,22 @@ $upcoming = [
                 });
                 html += '</ul>';
                 Swal.fire({
-                    title: 'Expiring Very Soon!',
-                    html: `<div style=\"font-size:1.08em; margin-bottom:8px;\">The following items will expire within 1 day:</div>${html}`,
-                    icon: 'warning',
-                    iconColor: '#dc3545',
+                    title: '<div style="display:flex;align-items:center;gap:14px;"><i class="fa-solid fa-triangle-exclamation" style="color:#dc3545;font-size:2.5em;"></i> <span style="font-size:1.0em;font-weight:900;color:#dc3545;letter-spacing:1px;">Expiring Very Soon!</span></div>',
+                    html: `<div style=\"font-size:1.0em; margin-bottom:10px; color:#23272f; font-weight:600;\">The following items will expire <span style=\"color:#dc3545;font-weight:700;\">within 1 day</span></div>${html}`,
+                    background: 'rgba(255,255,255,0.97)',
+                    icon: undefined,
+                    showConfirmButton: true,
                     confirmButtonColor: '#dc3545',
                     confirmButtonText: 'OK',
                     showCloseButton: true,
-                    customClass: { popup: 'swal2-inv-expiry' }
-                }).then(() => {
-                    // Set session variable via AJAX
-                    fetch('set_expiry_alert_session.php', { method: 'POST', credentials: 'same-origin' });
+                    customClass: { popup: 'swal2-inv-expiry' },
+                    width: 480,
+                    padding: '2.5em 2em 2em 2em',
+                    backdrop: 'rgba(220,53,69,0.08)'
                 });
                 // Optional: Play a sound
-                const audio = new Audio('https://cdn.pixabay.com/audio/2022/07/26/audio_124bfae5b2.mp3');
-                audio.play().catch(() => { });
+                // const audio = new Audio('https://cdn.pixabay.com/audio/2022/07/26/audio_124bfae5b2.mp3');
+                // audio.play().catch(() => { });
             }
         });
         // Chart.js for Inventory Status
