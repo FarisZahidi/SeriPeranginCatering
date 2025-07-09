@@ -24,10 +24,9 @@ Array.from(document.getElementsByClassName('editBtn')).forEach(function(btn) {
     modalEditId.value = btn.getAttribute('data-id');
     const row = btn.closest('tr');
     modalTitle.textContent = 'Edit Inventory Item';
-    document.getElementById('modal_item_name').value = row.cells[0].textContent.trim();
-    document.getElementById('modal_category').value = row.cells[1].textContent.trim();
-    document.getElementById('modal_unit').value = row.cells[2].textContent.trim();
-    document.getElementById('modal_expiry_date').value = row.cells[3].textContent.trim() === '-' ? '' : row.cells[3].textContent.trim();
+    document.getElementById('modal_item_name').value = row.cells[1].textContent.trim();
+    document.getElementById('modal_category').value = row.cells[2].textContent.trim();
+    document.getElementById('modal_unit').value = row.cells[3].textContent.trim();
     itemModal.style.display = 'flex';
   });
 });
@@ -54,7 +53,21 @@ itemForm.addEventListener('submit', function(e) {
 // Delete confirmation
 Array.from(document.getElementsByClassName('deleteBtn')).forEach(function(btn) {
   btn.addEventListener('click', function(e) {
-    if (!confirm('Delete this item?')) e.preventDefault();
+    e.preventDefault();
+    const url = btn.getAttribute('href');
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'This will permanently delete the item.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = url;
+      }
+    });
   });
 });
 
