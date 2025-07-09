@@ -182,6 +182,9 @@ $upcoming = [
                     width: 480,
                     padding: '2.5em 2em 2em 2em',
                     backdrop: 'rgba(220,53,69,0.08)'
+                }).then(() => {
+                    // Set session variable via AJAX so alert only shows once per login
+                    fetch('set_expiry_alert_session.php', { method: 'POST', credentials: 'same-origin' });
                 });
                 // Optional: Play a sound
                 // const audio = new Audio('https://cdn.pixabay.com/audio/2022/07/26/audio_124bfae5b2.mp3');
