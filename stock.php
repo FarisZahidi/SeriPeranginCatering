@@ -16,6 +16,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $batch_expiry_date = $_POST['batch_expiry_date'] ?? '';
   $user_id = $_SESSION['user_id'];
 
+  // Fetch before stock level
+  $before_stock = null;
+  $before_stmt = mysqli_prepare($conn, "SELECT IFNULL(SUM(CASE WHEN type = 'in' THEN quantity WHEN type = 'out' THEN -quantity ELSE 0 END), 0) AS stock_level FROM stock_logs WHERE item_id = ?");
+  mysqli_stmt_bind_param($before_stmt, 'i', $item_id);
+  mysqli_stmt_execute($before_stmt);
+  mysqli_stmt_bind_result($before_stmt, $before_stock);
+  mysqli_stmt_fetch($before_stmt);
+  mysqli_stmt_close($before_stmt);
+
   if (!$item_id || !$type || !$quantity || $quantity < 1) {
     $_SESSION['error'] = 'All fields are required and quantity must be positive.';
     header('Location: stock.php');
@@ -61,6 +70,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       mysqli_stmt_close($stmt2);
       $remaining -= $deduct;
     }
+    // Fetch after stock level
+    $after_stock = null;
+    $after_stmt = mysqli_prepare($conn, "SELECT IFNULL(SUM(CASE WHEN type = 'in' THEN quantity WHEN type = 'out' THEN -quantity ELSE 0 END), 0) AS stock_level FROM stock_logs WHERE item_id = ?");
+    mysqli_stmt_bind_param($after_stmt, 'i', $item_id);
+    mysqli_stmt_execute($after_stmt);
+    mysqli_stmt_bind_result($after_stmt, $after_stock);
+    mysqli_stmt_fetch($after_stmt);
+    mysqli_stmt_close($after_stmt);
+    // Audit log
+    $action = 'stock_out';
+    $before_data = json_encode(['stock_level' => $before_stock]);
+    $after_data = json_encode(['stock_level' => $after_stock]);
+    $log_stmt = mysqli_prepare($conn, "INSERT INTO audit_logs (user_id, action, item_id, before_data, after_data) VALUES (?, ?, ?, ?, ?)");
+    mysqli_stmt_bind_param($log_stmt, 'isiss', $user_id, $action, $item_id, $before_data, $after_data);
+    mysqli_stmt_execute($log_stmt);
+    mysqli_stmt_close($log_stmt);
     $_SESSION['success'] = 'Stock out entry added successfully (FIFO).';
     header('Location: stock.php');
     exit;
@@ -70,6 +95,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $stmt2 = mysqli_prepare($conn, "INSERT INTO stock_logs (item_id, type, quantity, batch_expiry_date, user_id) VALUES (?, ?, ?, ?, ?)");
   mysqli_stmt_bind_param($stmt2, 'isisi', $item_id, $type, $quantity, $batch_expiry_date, $user_id);
   if (mysqli_stmt_execute($stmt2)) {
+    // Fetch after stock level
+    $after_stock = null;
+    $after_stmt = mysqli_prepare($conn, "SELECT IFNULL(SUM(CASE WHEN type = 'in' THEN quantity WHEN type = 'out' THEN -quantity ELSE 0 END), 0) AS stock_level FROM stock_logs WHERE item_id = ?");
+    mysqli_stmt_bind_param($after_stmt, 'i', $item_id);
+    mysqli_stmt_execute($after_stmt);
+    mysqli_stmt_bind_result($after_stmt, $after_stock);
+    mysqli_stmt_fetch($after_stmt);
+    mysqli_stmt_close($after_stmt);
+    // Audit log
+    $action = 'stock_in';
+    $before_data = json_encode(['stock_level' => $before_stock]);
+    $after_data = json_encode(['stock_level' => $after_stock]);
+    $log_stmt = mysqli_prepare($conn, "INSERT INTO audit_logs (user_id, action, item_id, before_data, after_data) VALUES (?, ?, ?, ?, ?)");
+    mysqli_stmt_bind_param($log_stmt, 'isiss', $user_id, $action, $item_id, $before_data, $after_data);
+    mysqli_stmt_execute($log_stmt);
+    mysqli_stmt_close($log_stmt);
     $_SESSION['success'] = 'Stock entry added successfully.';
     header('Location: stock.php');
     exit;
@@ -236,7 +277,8 @@ if ($res_batch) {
             echo 'selected'; ?>>Ascending
           </option>
           <option value="DESC" <?php if (isset($_GET['order']) && $_GET['order'] === 'DESC')
-            echo 'selected'; ?>>Descending
+            echo 'selected'; ?>>
+            Descending
           </option>
         </select>
         <button type="submit" class="btn btn-primary"><i class="fa-solid fa-filter"></i> Apply</button>

@@ -1,5 +1,5 @@
 <?php
-$required_role = 'Owner';
+// $required_role = 'Owner'; // Allow both Staff and Owner
 include 'includes/auth_check.php';
 include 'includes/navbar.php';
 require_once 'includes/db.php';
@@ -16,8 +16,15 @@ $recent_updates = mysqli_query($conn, "SELECT item_name, created_at FROM invento
 // For chart: get counts for normal, low, expired
 $normal_stock = $total_items - $low_stock_count - $expired_count;
 
-// For alerts: items expiring soon (within 7 days) using batch expiry
-$expiring_soon = mysqli_query($conn, "SELECT i.item_name, s.batch_expiry_date as expiry_date FROM inventory i JOIN stock_logs s ON i.item_id = s.item_id WHERE s.batch_expiry_date IS NOT NULL AND s.batch_expiry_date >= CURDATE() AND s.batch_expiry_date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY) GROUP BY i.item_id, s.batch_expiry_date ORDER BY s.batch_expiry_date ASC LIMIT 5");
+// For alerts: items expiring soon (within 1 day) using batch expiry
+$expiring_soon = mysqli_query($conn, "SELECT i.item_name, s.batch_expiry_date as expiry_date FROM inventory i JOIN stock_logs s ON i.item_id = s.item_id WHERE s.batch_expiry_date IS NOT NULL AND s.batch_expiry_date >= CURDATE() AND s.batch_expiry_date <= DATE_ADD(CURDATE(), INTERVAL 1 DAY) GROUP BY i.item_id, s.batch_expiry_date ORDER BY s.batch_expiry_date ASC LIMIT 5");
+$expiring_soon_list = [];
+if ($expiring_soon && mysqli_num_rows($expiring_soon) > 0) {
+    while ($row = mysqli_fetch_assoc($expiring_soon)) {
+        $expiring_soon_list[] = $row;
+    }
+}
+$show_expiry_alert = !empty($expiring_soon_list) && empty($_SESSION['expiring_soon_alert_shown']);
 $low_stock_items = mysqli_query($conn, "SELECT i.item_name, IFNULL(SUM(CASE WHEN s.type = 'in' AND (s.batch_expiry_date IS NULL OR s.batch_expiry_date >= CURDATE()) THEN s.quantity WHEN s.type = 'out' THEN -s.quantity ELSE 0 END), 0) AS stock_level FROM inventory i LEFT JOIN stock_logs s ON i.item_id = s.item_id GROUP BY i.item_id HAVING stock_level < 10 ORDER BY stock_level ASC LIMIT 5");
 
 // Fetch stock by category
@@ -179,8 +186,37 @@ $upcoming = [
     </main>
     <?php include 'includes/footer.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="assets/js/homepage.js"></script>
     <script>
+        // Expiry Date Alert Popup (show only once per login/logout)
+        document.addEventListener('DOMContentLoaded', function () {
+            const expiringSoon = <?php echo json_encode($expiring_soon_list); ?>;
+            const showExpiryAlert = <?php echo $show_expiry_alert ? 'true' : 'false'; ?>;
+            if (expiringSoon.length > 0 && showExpiryAlert) {
+                let html = '<ul style="text-align:left; margin:0; padding:0 0 0 18px;">';
+                expiringSoon.forEach(item => {
+                    html += `<li style=\"margin-bottom:6px;\"><b>${item.item_name}</b> <span style=\"color:#dc3545; font-weight:600;\">(${item.expiry_date})</span></li>`;
+                });
+                html += '</ul>';
+                Swal.fire({
+                    title: 'Expiring Very Soon!',
+                    html: `<div style=\"font-size:1.08em; margin-bottom:8px;\">The following items will expire within 1 day:</div>${html}`,
+                    icon: 'warning',
+                    iconColor: '#dc3545',
+                    confirmButtonColor: '#dc3545',
+                    confirmButtonText: 'OK',
+                    showCloseButton: true,
+                    customClass: { popup: 'swal2-inv-expiry' }
+                }).then(() => {
+                    // Set session variable via AJAX
+                    fetch('set_expiry_alert_session.php', { method: 'POST', credentials: 'same-origin' });
+                });
+                // Optional: Play a sound
+                const audio = new Audio('https://cdn.pixabay.com/audio/2022/07/26/audio_124bfae5b2.mp3');
+                audio.play().catch(() => { });
+            }
+        });
         // Chart.js for Inventory Status
         const ctx = document.getElementById('stockChart').getContext('2d');
         new Chart(ctx, {

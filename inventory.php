@@ -1,5 +1,5 @@
 <?php
-$required_role = 'Owner';
+// $required_role = 'Owner'; // Allow both Staff and Owner
 include 'includes/auth_check.php';
 include 'includes/navbar.php';
 require_once 'includes/db.php';
@@ -49,6 +49,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_item'])) {
 // Handle Delete Item
 if (isset($_GET['delete'])) {
   $delete_id = intval($_GET['delete']);
+  // Fetch item before deleting
+  $item_stmt = mysqli_prepare($conn, "SELECT * FROM inventory WHERE item_id = ?");
+  mysqli_stmt_bind_param($item_stmt, 'i', $delete_id);
+  mysqli_stmt_execute($item_stmt);
+  $item_result = mysqli_stmt_get_result($item_stmt);
+  $item_data = mysqli_fetch_assoc($item_result);
+  mysqli_stmt_close($item_stmt);
   // Fetch image path before deleting
   $img_stmt = mysqli_prepare($conn, "SELECT image_path FROM inventory WHERE item_id = ?");
   mysqli_stmt_bind_param($img_stmt, 'i', $delete_id);
@@ -63,6 +70,16 @@ if (isset($_GET['delete'])) {
   $stmt = mysqli_prepare($conn, "DELETE FROM inventory WHERE item_id = ?");
   mysqli_stmt_bind_param($stmt, 'i', $delete_id);
   if (mysqli_stmt_execute($stmt)) {
+    // Audit log
+    if ($item_data && isset($_SESSION['user_id'])) {
+      $user_id = $_SESSION['user_id'];
+      $before_data = json_encode($item_data);
+      $action = 'delete';
+      $log_stmt = mysqli_prepare($conn, "INSERT INTO audit_logs (user_id, action, item_id, before_data) VALUES (?, ?, ?, ?)");
+      mysqli_stmt_bind_param($log_stmt, 'isis', $user_id, $action, $delete_id, $before_data);
+      mysqli_stmt_execute($log_stmt);
+      mysqli_stmt_close($log_stmt);
+    }
     $_SESSION['success'] = 'Item deleted successfully.';
     header('Location: inventory.php');
     exit;
@@ -88,6 +105,13 @@ if (isset($_GET['edit'])) {
 // Handle Update Item
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_item'])) {
   $edit_id = intval($_POST['edit_id']);
+  // Fetch old data
+  $old_stmt = mysqli_prepare($conn, "SELECT * FROM inventory WHERE item_id = ?");
+  mysqli_stmt_bind_param($old_stmt, 'i', $edit_id);
+  mysqli_stmt_execute($old_stmt);
+  $old_result = mysqli_stmt_get_result($old_stmt);
+  $old_data = mysqli_fetch_assoc($old_result);
+  mysqli_stmt_close($old_stmt);
   $item_name = trim($_POST['item_name'] ?? '');
   $category = trim($_POST['category'] ?? '');
   $unit = trim($_POST['unit'] ?? '');
@@ -127,6 +151,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_item'])) {
       mysqli_stmt_bind_param($stmt, 'sssi', $item_name, $category, $unit, $edit_id);
     }
     if (mysqli_stmt_execute($stmt)) {
+      // Audit log
+      if ($old_data && isset($_SESSION['user_id'])) {
+        $user_id = $_SESSION['user_id'];
+        $before_data = json_encode($old_data);
+        // Fetch new data
+        $new_stmt = mysqli_prepare($conn, "SELECT * FROM inventory WHERE item_id = ?");
+        mysqli_stmt_bind_param($new_stmt, 'i', $edit_id);
+        mysqli_stmt_execute($new_stmt);
+        $new_result = mysqli_stmt_get_result($new_stmt);
+        $new_data = mysqli_fetch_assoc($new_result);
+        mysqli_stmt_close($new_stmt);
+        $after_data = json_encode($new_data);
+        $action = 'edit';
+        $log_stmt = mysqli_prepare($conn, "INSERT INTO audit_logs (user_id, action, item_id, before_data, after_data) VALUES (?, ?, ?, ?, ?)");
+        mysqli_stmt_bind_param($log_stmt, 'isiss', $user_id, $action, $edit_id, $before_data, $after_data);
+        mysqli_stmt_execute($log_stmt);
+        mysqli_stmt_close($log_stmt);
+      }
       $_SESSION['success'] = 'Item updated successfully.';
       header('Location: inventory.php');
       exit;

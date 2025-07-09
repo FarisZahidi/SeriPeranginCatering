@@ -12,10 +12,11 @@ $edit_user = null;
 
 // Handle Add Staff
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_staff'])) {
+  $name = trim($_POST['name'] ?? '');
   $username = trim($_POST['username'] ?? '');
   $password = $_POST['password'] ?? '';
   $role = $_POST['role'] ?? '';
-  if (!$username || !$password || !$role) {
+  if (!$name || !$username || !$password || !$role) {
     $error = 'All fields are required.';
   } else {
     // Check if username exists
@@ -29,8 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_staff'])) {
       exit;
     } else {
       $hashed = password_hash($password, PASSWORD_DEFAULT);
-      $stmt2 = mysqli_prepare($conn, "INSERT INTO users (username, password, role) VALUES (?, ?, ?)");
-      mysqli_stmt_bind_param($stmt2, 'sss', $username, $hashed, $role);
+      $stmt2 = mysqli_prepare($conn, "INSERT INTO users (name, username, password, role) VALUES (?, ?, ?, ?)");
+      mysqli_stmt_bind_param($stmt2, 'ssss', $name, $username, $hashed, $role);
       if (mysqli_stmt_execute($stmt2)) {
         $_SESSION['success'] = 'Staff added successfully.';
         header('Location: staff.php');
@@ -72,7 +73,7 @@ if (isset($_GET['delete'])) {
 // Handle Edit Staff (fetch data)
 if (isset($_GET['edit'])) {
   $edit_id = intval($_GET['edit']);
-  $stmt = mysqli_prepare($conn, "SELECT user_id, username, role FROM users WHERE user_id = ? LIMIT 1");
+  $stmt = mysqli_prepare($conn, "SELECT user_id, name, username, role FROM users WHERE user_id = ? LIMIT 1");
   mysqli_stmt_bind_param($stmt, 'i', $edit_id);
   mysqli_stmt_execute($stmt);
   $result = mysqli_stmt_get_result($stmt);
@@ -83,11 +84,12 @@ if (isset($_GET['edit'])) {
 // Handle Update Staff
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_staff'])) {
   $edit_id = intval($_POST['edit_id']);
+  $name = trim($_POST['name'] ?? '');
   $username = trim($_POST['username'] ?? '');
   $role = $_POST['role'] ?? '';
   $password = $_POST['password'] ?? '';
-  if (!$username || !$role) {
-    $error = 'Username and role are required.';
+  if (!$name || !$username || !$role) {
+    $error = 'Name, username and role are required.';
   } else {
     // Check if username is taken by another user
     $stmt = mysqli_prepare($conn, "SELECT user_id FROM users WHERE username = ? AND user_id != ? LIMIT 1");
@@ -101,11 +103,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_staff'])) {
     } else {
       if ($password) {
         $hashed = password_hash($password, PASSWORD_DEFAULT);
-        $stmt2 = mysqli_prepare($conn, "UPDATE users SET username = ?, password = ?, role = ? WHERE user_id = ?");
-        mysqli_stmt_bind_param($stmt2, 'sssi', $username, $hashed, $role, $edit_id);
+        $stmt2 = mysqli_prepare($conn, "UPDATE users SET name = ?, username = ?, password = ?, role = ? WHERE user_id = ?");
+        mysqli_stmt_bind_param($stmt2, 'ssssi', $name, $username, $hashed, $role, $edit_id);
       } else {
-        $stmt2 = mysqli_prepare($conn, "UPDATE users SET username = ?, role = ? WHERE user_id = ?");
-        mysqli_stmt_bind_param($stmt2, 'ssi', $username, $role, $edit_id);
+        $stmt2 = mysqli_prepare($conn, "UPDATE users SET name = ?, username = ?, role = ? WHERE user_id = ?");
+        mysqli_stmt_bind_param($stmt2, 'sssi', $name, $username, $role, $edit_id);
       }
       if (mysqli_stmt_execute($stmt2)) {
         $_SESSION['success'] = 'Staff updated successfully.';
@@ -124,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_staff'])) {
 
 // Fetch staff list
 $staff = [];
-$result = mysqli_query($conn, "SELECT user_id, username, role, created_at FROM users ORDER BY created_at DESC");
+$result = mysqli_query($conn, "SELECT user_id, name, username, role, created_at FROM users ORDER BY created_at DESC");
 if ($result) {
   while ($row = mysqli_fetch_assoc($result)) {
     $staff[] = $row;
@@ -173,6 +175,7 @@ $roles = [
       <table class="table" id="staffTable">
         <thead>
           <tr>
+            <th>Name</th>
             <th>Username</th>
             <th>Role</th>
             <th>Created</th>
@@ -182,6 +185,7 @@ $roles = [
         <tbody>
           <?php foreach ($staff as $user): ?>
             <tr>
+              <td><?php echo htmlspecialchars($user['name']); ?></td>
               <td><?php echo htmlspecialchars($user['username']); ?></td>
               <td><?php echo htmlspecialchars($user['role']); ?></td>
               <td><?php echo date('d M Y', strtotime($user['created_at'])); ?></td>
@@ -210,6 +214,10 @@ $roles = [
       <form id="staffForm" method="post" action="staff.php">
         <input type="hidden" name="user_id" id="modal_user_id">
         <input type="hidden" name="edit_id" id="modal_edit_id">
+        <label for="modal_name">Name <i class="fa-solid fa-circle-question text-info"
+            title="Enter the staff name."></i></label>
+        <input type="text" name="name" id="modal_name" required
+          value="<?php echo htmlspecialchars($edit_user['name'] ?? ''); ?>">
         <label for="modal_username">Username <i class="fa-solid fa-circle-question text-info"
             title="Enter the staff username."></i></label>
         <input type="text" name="username" id="modal_username" required>
