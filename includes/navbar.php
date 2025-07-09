@@ -9,10 +9,11 @@ function nav_active($page)
 <!-- Sidebar and Topbar Navigation -->
 <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="assets/css/global.css">
+<link rel="stylesheet" href="assets/css/global.css?v=3">
 <style>
   :root {
-    --sidebar-glass: rgba(255, 255, 255, 0.18);
+    --sidebar-glass: rgba(67, 160, 71, 0.18);
+    /* Glassy green */
     --sidebar-blur: blur(18px);
     --sidebar-shadow: 0 8px 32px 0 rgba(34, 49, 63, 0.18), 0 2px 8px rgba(56, 142, 60, 0.10);
     --sidebar-accent: #43a047;
@@ -270,14 +271,17 @@ function nav_active($page)
     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'Owner'): ?>
       <li><a href="inventory.php" class="<?php echo nav_active('inventory.php'); ?>"><i class="fa-solid fa-warehouse"></i>
           <span>Inventory</span></a></li>
-      <li><a href="stock.php" class="<?php echo nav_active('stock.php'); ?>"><i class="fa-solid fa-arrow-right-arrow-left"></i> <span>Stock</span></a></li>
+      <li><a href="stock.php" class="<?php echo nav_active('stock.php'); ?>"><i
+            class="fa-solid fa-arrow-right-arrow-left"></i> <span>Stock</span></a></li>
       <li><a href="reports.php" class="<?php echo nav_active('reports.php'); ?>"><i class="fa-solid fa-chart-pie"></i>
           <span>Reports</span></a></li>
       <li><a href="staff.php" class="<?php echo nav_active('staff.php'); ?>"><i class="fa-solid fa-users"></i>
           <span>Staff</span></a></li>
-      <li><a href="audit_logs.php" class="<?php echo nav_active('audit_logs.php'); ?>"><i class="fa-solid fa-shield-halved"></i> <span>Audit Log</span></a></li>
+      <li><a href="audit_logs.php" class="<?php echo nav_active('audit_logs.php'); ?>"><i
+            class="fa-solid fa-shield-halved"></i> <span>Audit Log</span></a></li>
     <?php elseif (isset($_SESSION['role']) && $_SESSION['role'] === 'Staff'): ?>
-      <li><a href="stock.php" class="<?php echo nav_active('stock.php'); ?>"><i class="fa-solid fa-arrow-right-arrow-left"></i> <span>Stock</span></a></li>
+      <li><a href="stock.php" class="<?php echo nav_active('stock.php'); ?>"><i
+            class="fa-solid fa-arrow-right-arrow-left"></i> <span>Stock</span></a></li>
     <?php endif; ?>
   </ul>
   <div class="logout">

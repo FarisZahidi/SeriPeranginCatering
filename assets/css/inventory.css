@@ -1,77 +1,135 @@
 body {
-    background: #f7f7f7;
-    font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  font-family: 'Roboto', Arial, sans-serif;
 }
-.inventory-container {
-    width: 95%;
-    max-width: 1000px;
-    margin: 40px auto;
-    background: #fff;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+.inventory-main {
+  margin-left: var(--sidebar-width, 230px);
+  padding: 40px 24px 24px 24px;
+  background: var(--bg);
+  min-height: 100vh;
 }
-.inventory-container h1, .inventory-container h2 {
-    text-align: center;
+.inventory-title {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #23272f;
+  margin-bottom: 8px;
+  letter-spacing: 1.1px;
 }
-.inventory-form {
-    margin-bottom: 30px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    justify-content: center;
-    align-items: center;
+.inventory-section-title {
+  color: #43a047;
+  font-size: 1.13rem;
+  margin-bottom: 22px;
+  font-weight: 600;
 }
-.inventory-form label {
-    min-width: 100px;
+.inventory-card {
+  background: rgba(255,255,255,0.92);
+  border-radius: 14px;
+  box-shadow: 0 2px 12px #23272f11;
+  padding: 32px 0;
+  margin-bottom: 32px;
+  border-left: 7px solid var(--primary);
+  transition: box-shadow 0.18s, transform 0.18s;
 }
-.inventory-form input {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    min-width: 180px;
-}
-.inventory-form button {
-    padding: 10px 20px;
-    background: #007b5e;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-.inventory-form button:hover {
-    background: #005f46;
-}
-.inventory-search {
-    width: 60%;
-    margin: 0 auto 20px auto;
-    display: block;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
+.inventory-card:hover {
+  box-shadow: 0 6px 24px #43a04722;
+  transform: translateY(-2px) scale(1.02);
 }
 .inventory-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(255,255,255,0.97);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px #23272f0a;
 }
 .inventory-table th, .inventory-table td {
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: center;
+  padding: 14px 10px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
 }
 .inventory-table th {
-    background: #007b5e;
-    color: #fff;
+  background: var(--bg);
+  font-weight: 700;
+  color: #43a047;
+  font-size: 1.08rem;
+}
+.inventory-table tr:last-child td {
+  border-bottom: none;
 }
 .inventory-table tr:nth-child(even) {
-    background: #f2f2f2;
+  background: #f2f2f2;
 }
 .inventory-table a {
-    color: #007b5e;
-    text-decoration: none;
+  color: #007b5e;
+  text-decoration: none;
 }
 .inventory-table a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
+}
+.inventory-form {
+  margin-bottom: 30px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  justify-content: center;
+  align-items: center;
+}
+.inventory-form label {
+  min-width: 100px;
+  font-weight: 600;
+}
+.inventory-form input, .inventory-form select {
+  padding: 10px 14px;
+  border: 1.5px solid #ccc;
+  border-radius: 8px;
+  min-width: 180px;
+  font-size: 1.05rem;
+  background: #f9fbe7;
+  color: #333;
+  outline: none;
+  transition: border 0.2s;
+}
+.inventory-form input:focus, .inventory-form select:focus {
+  border: 1.5px solid #43a047;
+}
+.inventory-form button {
+  padding: 12px 28px;
+  background: linear-gradient(90deg, #43a047 0%, #388e3c 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1.08rem;
+  box-shadow: 0 2px 8px #43a04722;
+  transition: background 0.2s, transform 0.1s;
+}
+.inventory-form button:hover {
+  background: linear-gradient(90deg, #388e3c 0%, #43a047 100%);
+  transform: translateY(-2px) scale(1.03);
+}
+@media (max-width: 900px) {
+  .inventory-main {
+    margin-left: var(--sidebar-width-collapsed, 64px);
+    padding: 24px 4vw 24px 4vw;
+  }
+  .inventory-card {
+    min-width: 0;
+    width: 100%;
+    height: auto;
+  }
+  .inventory-table th, .inventory-table td {
+    padding: 10px 6px;
+    font-size: 0.98rem;
+  }
+}
+@media (max-width: 600px) {
+  .inventory-card {
+    padding: 10px;
+  }
+  .inventory-table th, .inventory-table td {
+    padding: 8px 4px;
+    font-size: 0.95rem;
+  }
 } 

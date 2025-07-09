@@ -129,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_staff'])) {
 
 // Fetch staff list
 $staff = [];
-$result = mysqli_query($conn, "SELECT user_id, name, username, role, created_at FROM users ORDER BY created_at DESC");
+$result = mysqli_query($conn, "SELECT user_id, name, username, role, created_at FROM users ORDER BY role ASC");
 if ($result) {
   while ($row = mysqli_fetch_assoc($result)) {
     $staff[] = $row;
@@ -142,7 +142,8 @@ $roles = [
 
 include 'includes/navbar.php';
 ?>
-<main style="margin-left:230px; padding:32px 16px 16px 16px; background:var(--bg); min-height:100vh;">
+<link rel="stylesheet" href="assets/css/staff.css?v=2">
+<main class="staff-main">
   <?php if ($error): ?>
     <script>
       window.addEventListener('DOMContentLoaded', function () {
@@ -152,7 +153,8 @@ include 'includes/navbar.php';
           icon: 'error',
           title: <?php echo json_encode($error); ?>,
           showConfirmButton: false,
-          timer: 3000
+          timer: 3000,
+          customClass: { popup: 'swal2-toast-glassy-error' }
         });
       });
     </script>
@@ -166,18 +168,19 @@ include 'includes/navbar.php';
           icon: 'success',
           title: <?php echo json_encode($success); ?>,
           showConfirmButton: false,
-          timer: 3000
+          timer: 3000,
+          customClass: { popup: 'swal2-toast-glassy-success' }
         });
       });
     </script>
   <?php endif; ?>
-  <div class="flex flex-between mb-3" style="align-items:center; flex-wrap:wrap; gap:16px;">
-    <h1 style="font-size:2rem; font-weight:700;">Staff Management</h1>
+  <div class="staff-header-row">
+    <h1 class="staff-title"><i class="fa-solid fa-users"></i> Staff Management</h1>
     <button class="btn btn-accent" id="addStaffBtn"><i class="fa-solid fa-user-plus"></i> Add Staff</button>
   </div>
-  <div class="card shadow">
-    <div style="overflow-x:auto;">
-      <table class="table" id="staffTable">
+  <div class="glassy-card staff-table-card">
+    <div class="staff-table-wrapper">
+      <table class="table staff-table" id="staffTable">
         <thead>
           <tr>
             <th>Name</th>
@@ -192,7 +195,9 @@ include 'includes/navbar.php';
             <tr>
               <td><?php echo htmlspecialchars($user['name']); ?></td>
               <td><?php echo htmlspecialchars($user['username']); ?></td>
-              <td><?php echo htmlspecialchars($user['role']); ?></td>
+              <td><span class="badge <?php echo $roles[$user['role']]['badge']; ?>"><i
+                    class="fa-solid <?php echo $roles[$user['role']]['icon']; ?>"></i>
+                  <?php echo htmlspecialchars($user['role']); ?></span></td>
               <td><?php echo date('d M Y', strtotime($user['created_at'])); ?></td>
               <td>
                 <button class="btn btn-warning btn-sm editStaffBtn" data-id="<?php echo $user['user_id']; ?>"><i
@@ -208,14 +213,10 @@ include 'includes/navbar.php';
       </table>
     </div>
   </div>
-  <!-- Modal for Add/Edit Staff -->
-  <div id="staffModal" class="modal"
-    style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.18); z-index:999; align-items:center; justify-content:center;">
-    <div class="card shadow" style="max-width:400px; width:100%; position:relative;">
-      <button id="closeStaffModal"
-        style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:1.3rem; color:var(--danger); cursor:pointer;"><i
-          class="fa-solid fa-xmark"></i></button>
-      <h2 id="staffModalTitle" style="font-size:1.2rem; font-weight:600; margin-bottom:16px;"></h2>
+  <div id="staffModal" class="modal glassy-modal">
+    <div class="card shadow glassy-card-modal">
+      <button id="closeStaffModal" class="modal-close-btn"><i class="fa-solid fa-xmark"></i></button>
+      <h2 id="staffModalTitle">Add Staff</h2>
       <form id="staffForm" method="post" action="staff.php">
         <input type="hidden" name="user_id" id="modal_user_id">
         <input type="hidden" name="edit_id" id="modal_edit_id">
@@ -225,7 +226,8 @@ include 'includes/navbar.php';
           value="<?php echo htmlspecialchars($edit_user['name'] ?? ''); ?>">
         <label for="modal_username">Username <i class="fa-solid fa-circle-question text-info"
             title="Enter the staff username."></i></label>
-        <input type="text" name="username" id="modal_username" required>
+        <input type="text" name="username" id="modal_username" required
+          value="<?php echo htmlspecialchars($edit_user['username'] ?? ''); ?>">
         <label for="modal_password">Password <i class="fa-solid fa-circle-question text-info"
             title="Set a password. Leave blank to keep current (edit only)."></i></label>
         <input type="password" name="password" id="modal_password">
@@ -233,8 +235,12 @@ include 'includes/navbar.php';
             title="Select the staff role."></i></label>
         <select name="role" id="modal_role" required>
           <option hidden value="">Select Role</option>
-          <?php foreach ($roles as $role => $info): ?>
-            <option value="<?php echo $role; ?>"><?php echo $role; ?></option>
+          <?php foreach (
+            $roles as $role => $info): ?>
+            <option value="<?php echo $role; ?>" <?php if (($edit_user['role'] ?? '') === $role)
+                 echo 'selected'; ?>>
+              <?php echo $role; ?>
+            </option>
           <?php endforeach; ?>
         </select>
         <div class="text-muted mb-2 mt-2" id="roleDesc" style="font-size:0.98rem;"></div>
@@ -266,6 +272,17 @@ include 'includes/navbar.php';
     modalEditStaffId.value = '';
   });
 </script>
+<?php if (isset($edit_user)): ?>
+  <script>
+    window.addEventListener('DOMContentLoaded', function () {
+      document.getElementById('staffModal').style.display = 'flex';
+      document.getElementById('staffModalTitle').textContent = 'Edit Staff';
+      document.getElementById('saveStaffBtn').name = 'update_staff';
+      document.getElementById('modal_edit_id').value = <?php echo json_encode($edit_user['user_id']); ?>;
+      // The input values are already pre-filled by PHP above
+    });
+  </script>
+<?php endif; ?>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 

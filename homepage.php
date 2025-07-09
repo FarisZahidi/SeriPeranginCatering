@@ -49,6 +49,15 @@ for ($i = 7; $i >= 0; $i--) {
     $stock_out[] = (int) $out;
 }
 
+// Fetch top 5 items by stock movement (last 30 days)
+$top_items = [];
+$top_result = mysqli_query($conn, "SELECT i.item_name, SUM(ABS(s.quantity)) as movement FROM stock_logs s JOIN inventory i ON s.item_id = i.item_id WHERE s.log_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) GROUP BY s.item_id ORDER BY movement DESC LIMIT 5");
+if ($top_result) {
+    while ($row = mysqli_fetch_assoc($top_result)) {
+        $top_items[] = $row;
+    }
+}
+
 // Example: Upcoming events (static for now)
 $upcoming = [
     ['date' => date('Y-m-d', strtotime('+2 days')), 'event' => 'Stock Review'],
@@ -148,9 +157,9 @@ $upcoming = [
                 <canvas id="categoryChart" width="600" height="220"></canvas>
             </div>
             <div class="dashboard-analytics-card">
-                <div style="font-weight:600; margin-bottom:12px; text-align:center;">Stock In/Out Trend (Last 8 Weeks)
-                </div>
-                <canvas id="trendChart" width="600" height="220"></canvas>
+                <div style="font-weight:600; margin-bottom:12px; text-align:center;">Top 5 Items by Stock Movement (Last
+                    30 Days)</div>
+                <canvas id="topItemsChart" width="600" height="220"></canvas>
             </div>
         </div>
     </main>
@@ -225,44 +234,31 @@ $upcoming = [
                 }
             }
         });
-        // Stock In/Out Trend Chart
-        const trendCtx = document.getElementById('trendChart').getContext('2d');
-        new Chart(trendCtx, {
-            type: 'line',
+        // Top 5 Items by Stock Movement Chart
+        const topItemsCtx = document.getElementById('topItemsChart').getContext('2d');
+        new Chart(topItemsCtx, {
+            type: 'bar',
             data: {
-                labels: <?php echo json_encode($trend_labels); ?>,
-                datasets: [
-                    {
-                        label: 'Stock In',
-                        data: <?php echo json_encode($stock_in); ?>,
-                        borderColor: '#4caf50',
-                        backgroundColor: 'rgba(76,175,80,0.08)',
-                        tension: 0.3,
-                        fill: true,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#4caf50',
-                        pointBorderColor: '#fff',
-                        pointHoverRadius: 6
-                    },
-                    {
-                        label: 'Stock Out',
-                        data: <?php echo json_encode($stock_out); ?>,
-                        borderColor: '#f44336',
-                        backgroundColor: 'rgba(244,67,54,0.08)',
-                        tension: 0.3,
-                        fill: true,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#f44336',
-                        pointBorderColor: '#fff',
-                        pointHoverRadius: 6
-                    }
-                ]
+                labels: <?php echo json_encode(array_column($top_items, 'item_name')); ?>,
+                datasets: [{
+                    label: 'Total Movement',
+                    data: <?php echo json_encode(array_map('intval', array_column($top_items, 'movement'))); ?>,
+                    backgroundColor: '#42a5f5',
+                    borderRadius: 8,
+                    maxBarThickness: 38
+                }]
             },
             options: {
                 plugins: {
-                    legend: { position: 'bottom' }
+                    legend: { display: false }
                 },
-                responsive: true
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
             }
         });
     </script>

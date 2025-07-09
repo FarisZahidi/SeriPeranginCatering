@@ -1,4 +1,16 @@
 <?php
+// Handle delete all logs (must be before any output)
+if (session_status() === PHP_SESSION_NONE)
+  session_start();
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_all_logs'])) {
+  if ($_SESSION['role'] === 'Owner') {
+    require_once 'includes/db.php';
+    mysqli_query($conn, 'TRUNCATE TABLE audit_logs');
+    $_SESSION['success'] = 'All audit logs have been deleted.';
+    header('Location: audit_logs.php');
+    exit;
+  }
+}
 $required_role = 'Owner';
 include 'includes/auth_check.php';
 include 'includes/navbar.php';
@@ -13,71 +25,130 @@ if ($result) {
     $logs[] = $row;
   }
 }
-function pretty_json($json)
+function pretty_audit_data($json)
 {
   if (!$json)
     return '';
   $arr = json_decode($json, true);
   if (!$arr)
     return htmlspecialchars($json);
-  // If only stock_level, show just the value
-  if (count($arr) === 1 && isset($arr['stock_level'])) {
-    return '<span style="font-weight:600; color:#007b5e;">' . htmlspecialchars($arr['stock_level']) . '</span>';
+  // Remove fields that are not useful for display
+  unset($arr['image_path'], $arr['created_at']);
+  if (empty($arr))
+    return '';
+  $out = '<ul class="audit-data-list">';
+  foreach ($arr as $k => $v) {
+    $label = ucwords(str_replace('_', ' ', $k));
+    $out .= '<li><span class="audit-data-label">' . htmlspecialchars($label) . ':</span> <span class="audit-data-value">' . htmlspecialchars($v) . '</span></li>';
   }
-  return '<pre style="white-space:pre-wrap;">' . htmlspecialchars(json_encode($arr, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) . '</pre>';
+  $out .= '</ul>';
+  return $out;
 }
 ?>
-<main style="margin-left:230px; padding:32px 16px 16px 16px; background:var(--bg); min-height:100vh;">
-  <h1 style="font-size:2rem; font-weight:700;">Audit Log</h1>
-  <div class="card shadow" style="overflow-x:auto;">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>User</th>
-          <th>Action</th>
-          <th>Name</th>
-          <th>Before</th>
-          <th>After</th>
-          <th>Timestamp</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php foreach (
-          $logs as $log): ?>
+<link rel="stylesheet" href="assets/css/global.css?v=2">
+<main class="audit-main">
+  <div class="glassy-card card shadow audit-card">
+    <div class="flex flex-between mb-2">
+      <h1 class="audit-title"><i class="fa-solid fa-clipboard-list text-info"></i> Audit Log</h1>
+      <form id="deleteAllLogsForm" method="post" style="margin:0;">
+        <button type="button" class="btn btn-danger" id="deleteAllLogsBtn"><i class="fa-solid fa-trash"></i> Delete All
+          Logs</button>
+        <input type="hidden" name="delete_all_logs" value="1">
+      </form>
+    </div>
+    <div class="audit-table-wrapper">
+      <table class="table audit-table">
+        <thead>
           <tr>
-            <td><?php echo htmlspecialchars($log['name'] ?? $log['user_id']); ?></td>
-            <td><span class="badge 
-              <?php
-              if ($log['action'] === 'delete')
-                echo 'badge-danger';
-              else if ($log['action'] === 'edit')
-                echo 'badge-warning';
-              else if ($log['action'] === 'stock_in')
-                echo 'badge-success';
-              else if ($log['action'] === 'stock_out')
-                echo 'badge-primary';
-              else
-                echo 'badge-info';
-              ?>">
-                <?php
-                if ($log['action'] === 'stock_in')
-                  echo 'Stock In';
-                else if ($log['action'] === 'stock_out')
-                  echo 'Stock Out';
-                else
-                  echo htmlspecialchars(ucfirst($log['action']));
-                ?>
-              </span></td>
-            <td><?php echo htmlspecialchars($log['item_name'] ?? ''); ?></td>
-            <td><?php echo pretty_json($log['before_data']); ?></td>
-            <td><?php echo pretty_json($log['after_data']); ?></td>
-            <td><?php echo date('d M Y H:i', strtotime($log['created_at'])); ?></td>
+            <th>User</th>
+            <th>Action</th>
+            <th>Name</th>
+            <th>Before</th>
+            <th>After</th>
+            <th>Timestamp</th>
           </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
-    <?php if (empty($logs)): ?>
-      <div class="text-muted" style="padding:24px; text-align:center;">No audit logs found.</div>
-    <?php endif; ?>
+        </thead>
+        <tbody>
+          <?php foreach ($logs as $log): ?>
+            <tr>
+              <td><span class="text-info audit-user">
+                  <?php echo htmlspecialchars($log['name'] ?? $log['user_id']); ?></span></td>
+              <td>
+                <span class="badge <?php
+                if ($log['action'] === 'delete')
+                  echo 'bg-danger';
+                else if ($log['action'] === 'edit')
+                  echo 'bg-warning';
+                else if ($log['action'] === 'stock_in')
+                  echo 'bg-success';
+                else if ($log['action'] === 'stock_out')
+                  echo 'bg-info';
+                else
+                  echo 'bg-secondary';
+                ?>">
+                  <?php
+                  if ($log['action'] === 'stock_in')
+                    echo 'Stock In';
+                  else if ($log['action'] === 'stock_out')
+                    echo 'Stock Out';
+                  else if ($log['action'] === 'edit')
+                    echo 'Edit';
+                  else if ($log['action'] === 'delete')
+                    echo 'Delete';
+                  else
+                    echo htmlspecialchars(ucfirst($log['action']));
+                  ?>
+                </span>
+              </td>
+              <td><span class="text-muted audit-item"><?php echo htmlspecialchars($log['item_name'] ?? ''); ?></span></td>
+              <td><?php echo pretty_audit_data($log['before_data']); ?></td>
+              <td><?php echo pretty_audit_data($log['after_data']); ?></td>
+              <td><span class="text-info audit-time"><i class="fa-regular fa-clock"></i>
+                  <?php echo date('d M Y H:i', strtotime($log['created_at'])); ?></span></td>
+            </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+      <?php if (empty($logs)): ?>
+        <div class="text-muted audit-empty">
+          <i class="fa-regular fa-face-smile-beam"></i><br>No audit logs found.
+        </div>
+      <?php endif; ?>
+    </div>
   </div>
 </main>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.getElementById('deleteAllLogsBtn')?.addEventListener('click', function (e) {
+    Swal.fire({
+      title: 'Delete All Audit Logs?',
+      text: 'This action cannot be undone. All audit logs will be permanently deleted.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete all',
+      cancelButtonText: 'Cancel',
+      customClass: { popup: 'swal2-toast-glassy-error' }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        document.getElementById('deleteAllLogsForm').submit();
+      }
+    });
+  });
+</script>
+<?php if (!empty($_SESSION['success'])): ?>
+  <script>
+    window.addEventListener('DOMContentLoaded', function () {
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: <?php echo json_encode($_SESSION['success']); ?>,
+        showConfirmButton: false,
+        timer: 3000,
+        customClass: { popup: 'swal2-toast-glassy-success' }
+      });
+    });
+  </script>
+  <?php unset($_SESSION['success']); endif; ?>

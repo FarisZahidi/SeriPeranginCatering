@@ -34,10 +34,14 @@ Array.from(document.getElementsByClassName('editStaffBtn')).forEach(function(btn
     modalEditStaffId.value = btn.getAttribute('data-id');
     const row = btn.closest('tr');
     staffModalTitle.textContent = 'Edit Staff';
-    document.getElementById('modal_username').value = row.cells[0].textContent.trim();
+    document.getElementById('modal_name').value = row.cells[0].textContent.trim(); // Set name
+    document.getElementById('modal_username').value = row.cells[1].textContent.trim(); // Set username
     document.getElementById('modal_password').value = '';
-    document.getElementById('modal_role').value = row.cells[1].textContent.trim();
-    roleDesc.textContent = roleDescriptions[row.cells[1].textContent.trim()] || '';
+    // Role cell contains a span with badge and icon, so extract text from the span
+    const roleCell = row.cells[2];
+    const roleText = roleCell.querySelector('span').textContent.trim();
+    document.getElementById('modal_role').value = roleText;
+    roleDesc.textContent = roleDescriptions[roleText] || '';
     staffModal.style.display = 'flex';
   });
 });

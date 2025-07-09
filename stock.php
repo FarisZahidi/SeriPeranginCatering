@@ -77,24 +77,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     mysqli_stmt_bind_result($after_stmt, $after_stock);
     mysqli_stmt_fetch($after_stmt);
     mysqli_stmt_close($after_stmt);
+    // Audit log for stock out
+    $before_data = json_encode(['stock_level' => $before_stock]);
+    $after_data = json_encode(['stock_level' => $after_stock]);
+    $action = 'stock_out';
+    $log_stmt = mysqli_prepare($conn, "INSERT INTO audit_logs (user_id, action, item_id, before_data, after_data) VALUES (?, ?, ?, ?, ?)");
+    mysqli_stmt_bind_param($log_stmt, 'isiss', $user_id, $action, $item_id, $before_data, $after_data);
+    mysqli_stmt_execute($log_stmt);
+    mysqli_stmt_close($log_stmt);
     $_SESSION['success'] = 'Stock out successful.';
     header('Location: stock.php');
     exit;
-  } else {
-    // Stock in
-    $stmt = mysqli_prepare($conn, "INSERT INTO stock_logs (item_id, type, quantity, batch_expiry_date, user_id) VALUES (?, ?, ?, ?, ?)");
-    mysqli_stmt_bind_param($stmt, 'isisi', $item_id, $type, $quantity, $batch_expiry_date, $user_id);
-    if (mysqli_stmt_execute($stmt)) {
-      $_SESSION['success'] = 'Stock in successful.';
-      header('Location: stock.php');
-      exit;
-    } else {
-      $_SESSION['error'] = 'Failed to add stock entry.';
-      header('Location: stock.php');
-      exit;
-    }
-    mysqli_stmt_close($stmt);
   }
+  // Stock in
+  $stmt = mysqli_prepare($conn, "INSERT INTO stock_logs (item_id, type, quantity, batch_expiry_date, user_id) VALUES (?, ?, ?, ?, ?)");
+  mysqli_stmt_bind_param($stmt, 'isisi', $item_id, $type, $quantity, $batch_expiry_date, $user_id);
+  if (mysqli_stmt_execute($stmt)) {
+    // Fetch after stock level
+    $after_stock = null;
+    $after_stmt = mysqli_prepare($conn, "SELECT IFNULL(SUM(CASE WHEN type = 'in' THEN quantity WHEN type = 'out' THEN -quantity ELSE 0 END), 0) AS stock_level FROM stock_logs WHERE item_id = ?");
+    mysqli_stmt_bind_param($after_stmt, 'i', $item_id);
+    mysqli_stmt_execute($after_stmt);
+    mysqli_stmt_bind_result($after_stmt, $after_stock);
+    mysqli_stmt_fetch($after_stmt);
+    mysqli_stmt_close($after_stmt);
+    // Audit log for stock in
+    $before_data = json_encode(['stock_level' => $before_stock]);
+    $after_data = json_encode(['stock_level' => $after_stock]);
+    $action = 'stock_in';
+    $log_stmt = mysqli_prepare($conn, "INSERT INTO audit_logs (user_id, action, item_id, before_data, after_data) VALUES (?, ?, ?, ?, ?)");
+    mysqli_stmt_bind_param($log_stmt, 'isiss', $user_id, $action, $item_id, $before_data, $after_data);
+    mysqli_stmt_execute($log_stmt);
+    mysqli_stmt_close($log_stmt);
+    $_SESSION['success'] = 'Stock in successful.';
+    header('Location: stock.php');
+    exit;
+  } else {
+    $_SESSION['error'] = 'Failed to add stock entry.';
+    header('Location: stock.php');
+    exit;
+  }
+  mysqli_stmt_close($stmt);
 }
 
 include 'includes/navbar.php';
@@ -182,7 +205,8 @@ if ($res_batch) {
   }
 }
 ?>
-<main style="margin-left:230px; padding:32px 16px 16px 16px; background:var(--bg); min-height:100vh;">
+<link rel="stylesheet" href="assets/css/stock.css?v=3">
+<main class="stock-main">
   <?php if ($error): ?>
     <script>
       window.addEventListener('DOMContentLoaded', function () {
@@ -192,7 +216,8 @@ if ($res_batch) {
           icon: 'error',
           title: <?php echo json_encode($error); ?>,
           showConfirmButton: false,
-          timer: 3000
+          timer: 3000,
+          customClass: { popup: 'swal2-toast-glassy-error' }
         });
       });
     </script>
@@ -206,30 +231,22 @@ if ($res_batch) {
           icon: 'success',
           title: <?php echo json_encode($success); ?>,
           showConfirmButton: false,
-          timer: 3000
+          timer: 3000,
+          customClass: { popup: 'swal2-toast-glassy-success' }
         });
       });
     </script>
   <?php endif; ?>
-  <div class="flex flex-between mb-3" style="align-items:center; flex-wrap:wrap; gap:16px;">
-    <h1 style="font-size:2rem; font-weight:700;">Stock In/Out</h1>
-    <div style="display:flex; gap:8px;">
-      <button class="btn btn-info" id="helpBtn" style="font-size:0.9rem;">
-        <i class="fa-solid fa-question-circle"></i> Help
-      </button>
-      <button class="btn btn-accent" id="quickStockBtn"><i class="fa-solid fa-plus-minus"></i> Quick In/Out</button>
-    </div>
-  </div>
-  <div class="flex flex-between" style="gap:24px; flex-wrap:wrap;">
-    <div class="card shadow" style="flex:2; min-width:320px;">
-      <h2 class="mb-2" style="font-size:1.2rem; font-weight:600;"><i class="fa-solid fa-boxes-stacked text-primary"></i>
-        Current Stock Levels</h2>
-      <!-- Sort/Filter Controls -->
-      <form method="get" style="margin-bottom:12px; display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+  <div class="stock-flex-row">
+    <div class="stock-card glassy-card">
+      <div class="stock-header-row">
+        <h1 class="stock-title"><i class="fa-solid fa-boxes-stacked text-primary"></i> Stock In/Out</h1>
+        <button class="btn btn-accent" id="quickStockBtn"><i class="fa-solid fa-plus-minus"></i> Quick In/Out</button>
+      </div>
+      <form method="get" class="stock-filter-form">
         <input type="text" name="search" placeholder="Search item name..."
-          value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>"
-          style="padding:6px 10px; border-radius:4px; border:1px solid #ccc; min-width:160px;">
-        <select name="status" style="padding:6px 10px; border-radius:4px; border:1px solid #ccc;">
+          value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
+        <select name="status">
           <option value="">All Status</option>
           <option value="Sufficient" <?php if (isset($_GET['status']) && $_GET['status'] === 'Sufficient')
             echo 'selected'; ?>>Sufficient</option>
@@ -240,7 +257,7 @@ if ($res_batch) {
             echo 'selected'; ?>>
             Expired</option>
         </select>
-        <select name="sort" style="padding:6px 10px; border-radius:4px; border:1px solid #ccc;">
+        <select name="sort">
           <option value="item_name" <?php if (!isset($_GET['sort']) || $_GET['sort'] === 'item_name')
             echo 'selected'; ?>>
             Sort by Name</option>
@@ -249,19 +266,18 @@ if ($res_batch) {
           <option value="earliest_expiry" <?php if (isset($_GET['sort']) && $_GET['sort'] === 'earliest_expiry')
             echo 'selected'; ?>>Sort by Expiry</option>
         </select>
-        <select name="order" style="padding:6px 10px; border-radius:4px; border:1px solid #ccc;">
+        <select name="order">
           <option value="ASC" <?php if (!isset($_GET['order']) || $_GET['order'] === 'ASC')
             echo 'selected'; ?>>Ascending
           </option>
           <option value="DESC" <?php if (isset($_GET['order']) && $_GET['order'] === 'DESC')
             echo 'selected'; ?>>
-            Descending
-          </option>
+            Descending</option>
         </select>
         <button type="submit" class="btn btn-primary"><i class="fa-solid fa-filter"></i> Apply</button>
         <?php if ($_GET): ?><a href="stock.php" class="btn btn-secondary">Reset</a><?php endif; ?>
       </form>
-      <div style="overflow-x:auto;">
+      <div class="stock-table-wrapper">
         <table class="table" id="stockTable">
           <thead>
             <tr>
@@ -338,10 +354,9 @@ if ($res_batch) {
         </table>
       </div>
     </div>
-    <div class="card shadow" style="flex:1; min-width:280px; max-width:400px;">
-      <h2 class="mb-2" style="font-size:1.2rem; font-weight:600;"><i
-          class="fa-solid fa-clock-rotate-left text-info"></i> Recent Stock Movements</h2>
-      <ul style="list-style:none; padding:0; max-height:340px; overflow-y:auto;">
+    <div class="stock-card glassy-card stock-logs-card">
+      <h2 class="stock-logs-title"><i class="fa-solid fa-clock-rotate-left text-info"></i> Recent Stock Movements</h2>
+      <ul class="stock-logs-list">
         <?php foreach ($logs as $log): ?>
           <li class="flex flex-between mb-2"
             style="align-items:center; border-bottom:1px solid var(--border); padding-bottom:6px;">
@@ -364,14 +379,11 @@ if ($res_batch) {
       </ul>
     </div>
   </div>
-  <!-- Modal for Quick In/Out -->
-  <div id="stockModal" class="modal"
-    style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.18); z-index:999; align-items:center; justify-content:center;">
-    <div class="card shadow" style="max-width:400px; width:100%; position:relative;">
-      <button id="closeStockModal"
-        style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:1.3rem; color:var(--danger); cursor:pointer;"><i
-          class="fa-solid fa-xmark"></i></button>
-      <h2 id="stockModalTitle" style="font-size:1.2rem; font-weight:600; margin-bottom:16px;">Quick Stock In/Out</h2>
+  <button class="fab" id="fabQuickStockBtn"><i class="fa-solid fa-plus-minus"></i></button>
+  <div id="stockModal" class="modal glassy-modal">
+    <div class="card shadow glassy-card-modal">
+      <button id="closeStockModal" class="modal-close-btn"><i class="fa-solid fa-xmark"></i></button>
+      <h2 id="stockModalTitle">Quick Stock In/Out</h2>
       <form id="stockForm" method="post" action="stock.php">
         <label for="modal_item_id">Item <i class="fa-solid fa-circle-question text-info"
             title="Select the item."></i></label>

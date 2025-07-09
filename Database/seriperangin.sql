@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 09, 2025 at 09:43 AM
+-- Generation Time: Jul 09, 2025 at 03:42 PM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -31,7 +31,7 @@ CREATE TABLE `audit_logs` (
   `id` int NOT NULL,
   `user_id` int NOT NULL,
   `action` varchar(16) NOT NULL,
-  `item_id` int NOT NULL,
+  `item_id` int DEFAULT NULL,
   `before_data` json NOT NULL,
   `after_data` json DEFAULT NULL,
   `timestamp` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -43,8 +43,11 @@ CREATE TABLE `audit_logs` (
 --
 
 INSERT INTO `audit_logs` (`id`, `user_id`, `action`, `item_id`, `before_data`, `after_data`, `timestamp`, `created_at`) VALUES
-(1, 1, 'stock_out', 5, '{\"stock_level\": \"20\"}', '{\"stock_level\": \"15\"}', '2025-07-09 17:15:40', '2025-07-09 09:15:40'),
-(2, 2, 'stock_out', 5, '{\"stock_level\": \"15\"}', '{\"stock_level\": \"12\"}', '2025-07-09 17:25:59', '2025-07-09 09:25:59');
+(1, 1, 'edit', 12, '{\"unit\": \"pcs\", \"item_id\": 12, \"category\": \"Fish\", \"item_name\": \"Fish\", \"created_at\": \"2025-07-09 23:39:28\", \"image_path\": \"assets/images/inv_686e8d3010e365.91960070.png\"}', '{\"unit\": \"kg\", \"item_id\": 12, \"category\": \"Fish\", \"item_name\": \"Fish\", \"created_at\": \"2025-07-09 23:39:28\", \"image_path\": \"assets/images/inv_686e8d3010e365.91960070.png\"}', '2025-07-09 23:39:31', '2025-07-09 15:39:31'),
+(2, 1, 'stock_in', 13, '{\"stock_level\": \"0\"}', '{\"stock_level\": \"10\"}', '2025-07-09 23:40:29', '2025-07-09 15:40:29'),
+(3, 1, 'stock_in', 11, '{\"stock_level\": \"0\"}', '{\"stock_level\": \"5\"}', '2025-07-09 23:40:47', '2025-07-09 15:40:47'),
+(4, 1, 'stock_in', 12, '{\"stock_level\": \"0\"}', '{\"stock_level\": \"10\"}', '2025-07-09 23:40:56', '2025-07-09 15:40:56'),
+(5, 1, 'stock_in', 14, '{\"stock_level\": \"0\"}', '{\"stock_level\": \"20\"}', '2025-07-09 23:41:11', '2025-07-09 15:41:11');
 
 -- --------------------------------------------------------
 
@@ -66,10 +69,10 @@ CREATE TABLE `inventory` (
 --
 
 INSERT INTO `inventory` (`item_id`, `item_name`, `category`, `unit`, `created_at`, `image_path`) VALUES
-(3, 'Carrot', 'Vegetables', 'pack', '2025-07-09 01:39:41', 'assets/images/inv_686dc85d4ced43.44706418.jpg'),
-(5, 'Fish', 'Fish', 'kg', '2025-07-09 02:22:02', 'assets/images/inv_686dd24a156a53.76193312.png'),
-(6, 'Onion', 'Dry Goods', 'kg', '2025-07-09 04:13:26', 'assets/images/inv_686dec66785289.27412172.jpeg'),
-(7, 'Water', 'Beverages', 'L', '2025-07-09 09:10:00', 'assets/images/inv_686e31e8338787.29076107.jpg');
+(11, 'Chicken', 'Meat', 'kg', '2025-07-09 15:37:21', 'assets/images/inv_686e8cb1be4263.01272956.jpg'),
+(12, 'Fish', 'Fish', 'kg', '2025-07-09 15:39:28', 'assets/images/inv_686e8d3010e365.91960070.png'),
+(13, 'Carrot', 'Vegetables', 'kg', '2025-07-09 15:39:50', 'assets/images/inv_686e8d4628ddc9.69650433.jpg'),
+(14, 'Onion', 'Dry Goods', 'kg', '2025-07-09 15:40:03', 'assets/images/inv_686e8d532d7c14.97318561.jpeg');
 
 -- --------------------------------------------------------
 
@@ -92,15 +95,10 @@ CREATE TABLE `stock_logs` (
 --
 
 INSERT INTO `stock_logs` (`log_id`, `item_id`, `type`, `quantity`, `batch_expiry_date`, `log_date`, `user_id`) VALUES
-(12, 3, 'in', 50, '2025-07-16', '2025-07-09 02:24:10', 1),
-(13, 5, 'in', 25, '2025-07-11', '2025-07-09 02:24:23', 1),
-(14, 6, 'in', 50, '2026-07-09', '2025-07-09 04:13:55', 1),
-(15, 6, 'in', 5, '2026-07-10', '2025-07-09 04:14:17', 1),
-(19, 5, 'out', 5, '2025-07-11', '2025-07-09 09:09:03', 1),
-(20, 5, 'out', 5, '2025-07-11', '2025-07-09 09:10:36', 2),
-(21, 5, 'in', 5, '2025-07-09', '2025-07-09 09:12:54', 1),
-(22, 5, 'out', 5, '2025-07-09', '2025-07-09 09:15:40', 1),
-(23, 5, 'out', 3, '2025-07-11', '2025-07-09 09:25:59', 2);
+(36, 13, 'in', 10, '2025-07-16', '2025-07-09 15:40:29', 1),
+(37, 11, 'in', 5, '2025-07-12', '2025-07-09 15:40:47', 1),
+(38, 12, 'in', 10, '2025-07-11', '2025-07-09 15:40:56', 1),
+(39, 14, 'in', 20, '2026-07-09', '2025-07-09 15:41:11', 1);
 
 -- --------------------------------------------------------
 
@@ -123,7 +121,7 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`user_id`, `name`, `username`, `password`, `role`, `created_at`) VALUES
 (1, 'Administrator', 'admin', '$2y$10$3xTP.TzbTmYZxRnF7tQfROE5uIUJzrtwwF1w4RlN5lELlhsbsotFK', 'Owner', '2025-07-09 01:28:44'),
-(2, 'Aniqah', 'Aniqah', '$2y$10$YDH4.AdejeaNL.4VXj6eGOAvCTGJgw/0isSL4qsTUjaahfEueuVKe', 'Staff', '2025-07-09 02:22:41');
+(3, 'Aniqah', 'Aniqah', '$2y$10$/pB99YUSBu9PR75L3Ra7weIGxrxRq2hM1KLroqC03jD0o2Orni3S6', 'Staff', '2025-07-09 15:19:16');
 
 --
 -- Indexes for dumped tables
@@ -166,25 +164,25 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `audit_logs`
 --
 ALTER TABLE `audit_logs`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `inventory`
 --
 ALTER TABLE `inventory`
-  MODIFY `item_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `item_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `stock_logs`
 --
 ALTER TABLE `stock_logs`
-  MODIFY `log_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `log_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `user_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Constraints for dumped tables
@@ -194,8 +192,7 @@ ALTER TABLE `users`
 -- Constraints for table `audit_logs`
 --
 ALTER TABLE `audit_logs`
-  ADD CONSTRAINT `audit_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
-  ADD CONSTRAINT `audit_logs_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `inventory` (`item_id`);
+  ADD CONSTRAINT `audit_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
 
 --
 -- Constraints for table `stock_logs`
