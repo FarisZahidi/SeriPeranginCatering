@@ -38,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -45,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Register - Seri Perangin Catering</title>
     <link rel="stylesheet" href="assets/css/login.css">
 </head>
+
 <body>
     <div class="login-container">
         <h2>Register</h2>
@@ -66,8 +68,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <label for="confirm_password">Confirm Password</label>
             <input type="password" id="confirm_password" name="confirm_password" required>
             <label for="role">Role</label>
-            <select id="role" name="role" required>
-                <option value="">Select Role</option>
+            <select id="role" name="role" required
+                style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:16px; background:#fff; color:#333; margin-bottom:20px;">
+                <option hidden value="">Select Role</option>
                 <option value="Owner">Owner</option>
                 <option value="Staff">Staff</option>
             </select>
@@ -77,4 +80,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     <script src="assets/js/register.js"></script>
 </body>
-</html> 
+
+</html>
