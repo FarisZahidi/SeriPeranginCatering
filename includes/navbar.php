@@ -267,17 +267,17 @@ function nav_active($page)
   <ul>
     <li><a href="homepage.php" class="<?php echo nav_active('homepage.php'); ?>"><i class="fa-solid fa-gauge"></i>
         <span>Dashboard</span></a></li>
-    <li><a href="inventory.php" class="<?php echo nav_active('inventory.php'); ?>"><i class="fa-solid fa-warehouse"></i>
-        <span>Inventory</span></a></li>
-    <li><a href="stock.php" class="<?php echo nav_active('stock.php'); ?>"><i
-          class="fa-solid fa-arrow-right-arrow-left"></i> <span>Stock</span></a></li>
     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'Owner'): ?>
+      <li><a href="inventory.php" class="<?php echo nav_active('inventory.php'); ?>"><i class="fa-solid fa-warehouse"></i>
+          <span>Inventory</span></a></li>
+      <li><a href="stock.php" class="<?php echo nav_active('stock.php'); ?>"><i class="fa-solid fa-arrow-right-arrow-left"></i> <span>Stock</span></a></li>
       <li><a href="reports.php" class="<?php echo nav_active('reports.php'); ?>"><i class="fa-solid fa-chart-pie"></i>
           <span>Reports</span></a></li>
       <li><a href="staff.php" class="<?php echo nav_active('staff.php'); ?>"><i class="fa-solid fa-users"></i>
           <span>Staff</span></a></li>
-      <li><a href="audit_logs.php" class="<?php echo nav_active('audit_logs.php'); ?>"><i
-            class="fa-solid fa-shield-halved"></i> <span>Audit Log</span></a></li>
+      <li><a href="audit_logs.php" class="<?php echo nav_active('audit_logs.php'); ?>"><i class="fa-solid fa-shield-halved"></i> <span>Audit Log</span></a></li>
+    <?php elseif (isset($_SESSION['role']) && $_SESSION['role'] === 'Staff'): ?>
+      <li><a href="stock.php" class="<?php echo nav_active('stock.php'); ?>"><i class="fa-solid fa-arrow-right-arrow-left"></i> <span>Stock</span></a></li>
     <?php endif; ?>
   </ul>
   <div class="logout">

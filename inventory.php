@@ -194,7 +194,7 @@ if ($result) {
 $categories = ['Vegetables', 'Fruits', 'Meat', 'Fish', 'Dairy', 'Beverages', 'Dry Goods', 'Canned Goods', 'Frozen', 'Other'];
 $units = ['kg', 'g', 'L', 'ml', 'pcs', 'pack', 'box'];
 ?>
-<main style="margin-left:220px; padding:32px 16px 16px 16px; background:var(--bg); min-height:100vh;">
+<main style="margin-left:230px; padding:32px 16px 16px 16px; background:var(--bg); min-height:100vh;">
   <?php if ($error): ?>
     <script>
       window.addEventListener('DOMContentLoaded', function () {

@@ -1,7 +1,6 @@
 <?php
 $required_role = 'Owner';
 include 'includes/auth_check.php';
-include 'includes/navbar.php';
 require_once 'includes/db.php';
 
 $error = $_SESSION['error'] ?? '';
@@ -17,7 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_staff'])) {
   $password = $_POST['password'] ?? '';
   $role = $_POST['role'] ?? '';
   if (!$name || !$username || !$password || !$role) {
-    $error = 'All fields are required.';
+    $_SESSION['error'] = 'All fields are required.';
+    header('Location: staff.php');
+    exit;
   } else {
     // Check if username exists
     $stmt = mysqli_prepare($conn, "SELECT user_id FROM users WHERE username = ? LIMIT 1");
@@ -89,7 +90,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_staff'])) {
   $role = $_POST['role'] ?? '';
   $password = $_POST['password'] ?? '';
   if (!$name || !$username || !$role) {
-    $error = 'Name, username and role are required.';
+    $_SESSION['error'] = 'Name, username and role are required.';
+    header('Location: staff.php');
+    exit;
   } else {
     // Check if username is taken by another user
     $stmt = mysqli_prepare($conn, "SELECT user_id FROM users WHERE username = ? AND user_id != ? LIMIT 1");
@@ -136,8 +139,10 @@ $roles = [
   'Owner' => ['badge' => 'bg-success', 'icon' => 'fa-crown', 'desc' => 'Full access to all modules'],
   'Staff' => ['badge' => 'bg-info', 'icon' => 'fa-user', 'desc' => 'Stock in/out, update usage only'],
 ];
+
+include 'includes/navbar.php';
 ?>
-<main style="margin-left:220px; padding:32px 16px 16px 16px; background:var(--bg); min-height:100vh;">
+<main style="margin-left:230px; padding:32px 16px 16px 16px; background:var(--bg); min-height:100vh;">
   <?php if ($error): ?>
     <script>
       window.addEventListener('DOMContentLoaded', function () {

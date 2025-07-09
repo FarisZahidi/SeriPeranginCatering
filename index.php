@@ -81,10 +81,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <button type="submit" class="auth-btn"><i class="fa fa-sign-in-alt"></i> Login</button>
         </form>
-        <div class="auth-divider"><span>or</span></div>
-        <div class="auth-switch">
-            Don't have an account? <a href="register.php">Register here</a>
-        </div>
     </div>
 </body>
 

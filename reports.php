@@ -67,7 +67,7 @@ if ($result_logs) {
   }
 }
 ?>
-<main style="margin-left:220px; padding:32px 16px 16px 16px; background:var(--bg); min-height:100vh;">
+<main style="margin-left:230px; padding:32px 16px 16px 16px; background:var(--bg); min-height:100vh;">
   <h1 style="font-size:2rem; font-weight:700; margin-bottom:24px;">Reports</h1>
   <!-- <div class="flex flex-between mb-3" style="gap:24px; flex-wrap:wrap;">
     <div class="card shadow"
