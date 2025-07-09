@@ -1,6 +1,5 @@
 <?php
 include 'includes/auth_check.php';
-include 'includes/navbar.php';
 require_once 'includes/db.php';
 require_once 'includes/expiry_defaults.php';
 
@@ -78,49 +77,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     mysqli_stmt_bind_result($after_stmt, $after_stock);
     mysqli_stmt_fetch($after_stmt);
     mysqli_stmt_close($after_stmt);
-    // Audit log
-    $action = 'stock_out';
-    $before_data = json_encode(['stock_level' => $before_stock]);
-    $after_data = json_encode(['stock_level' => $after_stock]);
-    $log_stmt = mysqli_prepare($conn, "INSERT INTO audit_logs (user_id, action, item_id, before_data, after_data) VALUES (?, ?, ?, ?, ?)");
-    mysqli_stmt_bind_param($log_stmt, 'isiss', $user_id, $action, $item_id, $before_data, $after_data);
-    mysqli_stmt_execute($log_stmt);
-    mysqli_stmt_close($log_stmt);
-    $_SESSION['success'] = 'Stock out entry added successfully (FIFO).';
-    header('Location: stock.php');
-    exit;
-  }
-
-  // Insert stock log with batch expiry date (for stock in)
-  $stmt2 = mysqli_prepare($conn, "INSERT INTO stock_logs (item_id, type, quantity, batch_expiry_date, user_id) VALUES (?, ?, ?, ?, ?)");
-  mysqli_stmt_bind_param($stmt2, 'isisi', $item_id, $type, $quantity, $batch_expiry_date, $user_id);
-  if (mysqli_stmt_execute($stmt2)) {
-    // Fetch after stock level
-    $after_stock = null;
-    $after_stmt = mysqli_prepare($conn, "SELECT IFNULL(SUM(CASE WHEN type = 'in' THEN quantity WHEN type = 'out' THEN -quantity ELSE 0 END), 0) AS stock_level FROM stock_logs WHERE item_id = ?");
-    mysqli_stmt_bind_param($after_stmt, 'i', $item_id);
-    mysqli_stmt_execute($after_stmt);
-    mysqli_stmt_bind_result($after_stmt, $after_stock);
-    mysqli_stmt_fetch($after_stmt);
-    mysqli_stmt_close($after_stmt);
-    // Audit log
-    $action = 'stock_in';
-    $before_data = json_encode(['stock_level' => $before_stock]);
-    $after_data = json_encode(['stock_level' => $after_stock]);
-    $log_stmt = mysqli_prepare($conn, "INSERT INTO audit_logs (user_id, action, item_id, before_data, after_data) VALUES (?, ?, ?, ?, ?)");
-    mysqli_stmt_bind_param($log_stmt, 'isiss', $user_id, $action, $item_id, $before_data, $after_data);
-    mysqli_stmt_execute($log_stmt);
-    mysqli_stmt_close($log_stmt);
-    $_SESSION['success'] = 'Stock entry added successfully.';
+    $_SESSION['success'] = 'Stock out successful.';
     header('Location: stock.php');
     exit;
   } else {
-    $_SESSION['error'] = 'Failed to add stock entry.';
-    header('Location: stock.php');
-    exit;
+    // Stock in
+    $stmt = mysqli_prepare($conn, "INSERT INTO stock_logs (item_id, type, quantity, batch_expiry_date, user_id) VALUES (?, ?, ?, ?, ?)");
+    mysqli_stmt_bind_param($stmt, 'isisi', $item_id, $type, $quantity, $batch_expiry_date, $user_id);
+    if (mysqli_stmt_execute($stmt)) {
+      $_SESSION['success'] = 'Stock in successful.';
+      header('Location: stock.php');
+      exit;
+    } else {
+      $_SESSION['error'] = 'Failed to add stock entry.';
+      header('Location: stock.php');
+      exit;
+    }
+    mysqli_stmt_close($stmt);
   }
-  mysqli_stmt_close($stmt2);
 }
+
+include 'includes/navbar.php';
 
 // Fetch inventory for dropdown with category info
 $items = [];
@@ -205,7 +182,7 @@ if ($res_batch) {
   }
 }
 ?>
-<main style="margin-left:220px; padding:32px 16px 16px 16px; background:var(--bg); min-height:100vh;">
+<main style="margin-left:230px; padding:32px 16px 16px 16px; background:var(--bg); min-height:100vh;">
   <?php if ($error): ?>
     <script>
       window.addEventListener('DOMContentLoaded', function () {

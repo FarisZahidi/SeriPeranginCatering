@@ -27,7 +27,7 @@ function pretty_json($json)
   return '<pre style="white-space:pre-wrap;">' . htmlspecialchars(json_encode($arr, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) . '</pre>';
 }
 ?>
-<main style="margin-left:220px; padding:32px 16px 16px 16px; background:var(--bg); min-height:100vh;">
+<main style="margin-left:230px; padding:32px 16px 16px 16px; background:var(--bg); min-height:100vh;">
   <h1 style="font-size:2rem; font-weight:700;">Audit Log</h1>
   <div class="card shadow" style="overflow-x:auto;">
     <table class="table">
