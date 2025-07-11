@@ -81,8 +81,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $before_data = json_encode(['stock_level' => $before_stock]);
     $after_data = json_encode(['stock_level' => $after_stock]);
     $action = 'stock_out';
-    $log_stmt = mysqli_prepare($conn, "INSERT INTO audit_logs (user_id, action, item_id, before_data, after_data) VALUES (?, ?, ?, ?, ?)");
-    mysqli_stmt_bind_param($log_stmt, 'isiss', $user_id, $action, $item_id, $before_data, $after_data);
+    $user_name = $_SESSION['name'];
+    $log_stmt = mysqli_prepare($conn, "INSERT INTO audit_logs (user_name, action, item_id, before_data, after_data) VALUES (?, ?, ?, ?, ?)");
+    mysqli_stmt_bind_param($log_stmt, 'ssiss', $user_name, $action, $item_id, $before_data, $after_data);
     mysqli_stmt_execute($log_stmt);
     mysqli_stmt_close($log_stmt);
     $_SESSION['success'] = 'Stock out successful.';
@@ -105,8 +106,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $before_data = json_encode(['stock_level' => $before_stock]);
     $after_data = json_encode(['stock_level' => $after_stock]);
     $action = 'stock_in';
-    $log_stmt = mysqli_prepare($conn, "INSERT INTO audit_logs (user_id, action, item_id, before_data, after_data) VALUES (?, ?, ?, ?, ?)");
-    mysqli_stmt_bind_param($log_stmt, 'isiss', $user_id, $action, $item_id, $before_data, $after_data);
+    $user_name = $_SESSION['name'];
+    $log_stmt = mysqli_prepare($conn, "INSERT INTO audit_logs (user_name, action, item_id, before_data, after_data) VALUES (?, ?, ?, ?, ?)");
+    mysqli_stmt_bind_param($log_stmt, 'ssiss', $user_name, $action, $item_id, $before_data, $after_data);
     mysqli_stmt_execute($log_stmt);
     mysqli_stmt_close($log_stmt);
     $_SESSION['success'] = 'Stock in successful.';
@@ -182,7 +184,7 @@ if ($result2) {
 
 // Fetch recent stock logs with batch expiry dates
 $logs = [];
-$result3 = mysqli_query($conn, "SELECT s.*, u.username, i.item_name FROM stock_logs s LEFT JOIN users u ON s.user_id = u.user_id LEFT JOIN inventory i ON s.item_id = i.item_id ORDER BY s.log_date DESC LIMIT 12");
+$result3 = mysqli_query($conn, "SELECT s.*, u.name as user_name, i.item_name FROM stock_logs s LEFT JOIN users u ON s.user_id = u.user_id LEFT JOIN inventory i ON s.item_id = i.item_id ORDER BY s.log_date DESC LIMIT 12");
 if ($result3) {
   while ($row = mysqli_fetch_assoc($result3)) {
     $logs[] = $row;

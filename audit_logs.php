@@ -16,8 +16,8 @@ include 'includes/auth_check.php';
 include 'includes/navbar.php';
 require_once 'includes/db.php';
 
-// Fetch audit logs with user info and item name
-$sql = "SELECT a.*, u.name, i.item_name FROM audit_logs a LEFT JOIN users u ON a.user_id = u.user_id LEFT JOIN inventory i ON a.item_id = i.item_id ORDER BY a.created_at DESC LIMIT 200";
+// Fetch audit logs with item name (user_name is now stored directly in audit_logs)
+$sql = "SELECT a.*, i.item_name FROM audit_logs a LEFT JOIN inventory i ON a.item_id = i.item_id ORDER BY a.created_at DESC LIMIT 200";
 $result = mysqli_query($conn, $sql);
 $logs = [];
 if ($result) {
@@ -72,7 +72,7 @@ function pretty_audit_data($json)
           <?php foreach ($logs as $log): ?>
             <tr>
               <td><span class="text-info audit-user">
-                  <?php echo htmlspecialchars($log['name'] ?? $log['user_id']); ?></span></td>
+                  <?php echo htmlspecialchars($log['user_name'] ?? 'Unknown User'); ?></span></td>
               <td>
                 <span class="badge <?php
                 if ($log['action'] === 'delete')

@@ -64,11 +64,11 @@ if (isset($_GET['delete'])) {
   mysqli_stmt_close($img_stmt);
   // Audit log (move BEFORE deletion)
   if ($item_data && isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
+    $user_name = $_SESSION['name'];
     $before_data = json_encode($item_data);
     $action = 'delete';
-    $log_stmt = mysqli_prepare($conn, "INSERT INTO audit_logs (user_id, action, item_id, before_data) VALUES (?, ?, ?, ?)");
-    mysqli_stmt_bind_param($log_stmt, 'isis', $user_id, $action, $delete_id, $before_data);
+    $log_stmt = mysqli_prepare($conn, "INSERT INTO audit_logs (user_name, action, item_id, before_data) VALUES (?, ?, ?, ?)");
+    mysqli_stmt_bind_param($log_stmt, 'ssis', $user_name, $action, $delete_id, $before_data);
     mysqli_stmt_execute($log_stmt);
     mysqli_stmt_close($log_stmt);
   }
@@ -152,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_item'])) {
     if (mysqli_stmt_execute($stmt)) {
       // Audit log
       if ($old_data && isset($_SESSION['user_id'])) {
-        $user_id = $_SESSION['user_id'];
+        $user_name = $_SESSION['name'];
         $before_data = json_encode($old_data);
         // Fetch new data
         $new_stmt = mysqli_prepare($conn, "SELECT * FROM inventory WHERE item_id = ?");
@@ -163,8 +163,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_item'])) {
         mysqli_stmt_close($new_stmt);
         $after_data = json_encode($new_data);
         $action = 'edit';
-        $log_stmt = mysqli_prepare($conn, "INSERT INTO audit_logs (user_id, action, item_id, before_data, after_data) VALUES (?, ?, ?, ?, ?)");
-        mysqli_stmt_bind_param($log_stmt, 'isiss', $user_id, $action, $edit_id, $before_data, $after_data);
+        $log_stmt = mysqli_prepare($conn, "INSERT INTO audit_logs (user_name, action, item_id, before_data, after_data) VALUES (?, ?, ?, ?, ?)");
+        mysqli_stmt_bind_param($log_stmt, 'ssiss', $user_name, $action, $edit_id, $before_data, $after_data);
         mysqli_stmt_execute($log_stmt);
         mysqli_stmt_close($log_stmt);
       }

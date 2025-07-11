@@ -35,8 +35,8 @@ body {
   transform: translateY(-2px) scale(1.02);
 }
 .inventory-table {
-  width: 100%;
-  border-collapse: collapse;
+    width: 100%;
+    border-collapse: collapse;
   background: rgba(255,255,255,0.97);
   border-radius: 12px;
   overflow: hidden;
@@ -45,7 +45,7 @@ body {
 }
 .inventory-table th, .inventory-table td {
   padding: 14px 10px;
-  text-align: center;
+    text-align: center;
   border-bottom: 1px solid var(--border);
 }
 .inventory-table th {
@@ -58,14 +58,14 @@ body {
   border-bottom: none;
 }
 .inventory-table tr:nth-child(even) {
-  background: #f2f2f2;
+    background: #f2f2f2;
 }
 .inventory-table a {
-  color: #007b5e;
-  text-decoration: none;
+    color: #007b5e;
+    text-decoration: none;
 }
 .inventory-table a:hover {
-  text-decoration: underline;
+    text-decoration: underline;
 }
 .inventory-form {
   margin-bottom: 30px;

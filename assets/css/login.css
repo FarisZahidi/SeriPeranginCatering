@@ -66,7 +66,7 @@ body {
   font-size: 1.13rem;
   margin-bottom: 22px;
   font-weight: 500;
-  text-align: center;
+    text-align: center;
   text-shadow: 0 1px 4px rgba(40,40,40,0.10);
 }
 .form-group-modern {
@@ -76,7 +76,7 @@ body {
 }
 .form-group-modern input,
 .form-group-modern select {
-  width: 100%;
+    width: 100%;
   box-sizing: border-box;
   padding: 16px 14px 16px 14px;
   border: 1.5px solid #bdbdbd;
@@ -120,17 +120,17 @@ body {
   box-shadow: 0 1px 4px rgba(67,160,71,0.04);
 }
 .auth-btn {
-  width: 100%;
+    width: 100%;
   box-sizing: border-box;
   background: linear-gradient(90deg, #43a047 0%, #388e3c 100%);
-  color: #fff;
+    color: #fff;
   font-size: 1.18rem;
   font-weight: 800;
-  border: none;
+    border: none;
   border-radius: 10px;
   padding: 16px 0;
   margin-top: 10px;
-  cursor: pointer;
+    cursor: pointer;
   box-shadow: 0 2px 12px rgba(56,142,60,0.13);
   transition: background 0.2s, transform 0.1s;
   display: flex;
@@ -145,7 +145,7 @@ body {
 }
 .auth-divider {
   width: 100%;
-  text-align: center;
+    text-align: center;
   color: #bbb;
   margin: 22px 0 12px 0;
   font-size: 1.05rem;
@@ -180,7 +180,7 @@ body {
 }
 .auth-switch a {
   color: #fd7e14;
-  text-decoration: underline;
+    text-decoration: underline;
   font-weight: 700;
   letter-spacing: 0.2px;
 }

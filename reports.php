@@ -269,8 +269,8 @@ if ($result_logs) {
               <td><?php echo $log['type'] === 'in' ? 'Stock In' : 'Stock Out'; ?></td>
               <td><?php echo $log['quantity']; ?></td>
               <td><?php echo htmlspecialchars($log['username']); ?></td>
-            </tr>
-          <?php endforeach; ?>
+              </tr>
+            <?php endforeach; ?>
         </tbody>
       </table>
     </div>
